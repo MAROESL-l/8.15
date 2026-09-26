@@ -36,3 +36,18 @@
 nav a[aria-current="page"]{color:var(--red)}
 .new-page{min-height:100vh;display:flex;flex-direction:column}.new-page .site-header,.new-page footer{width:100%}.new-content{width:100%;flex:1;padding-top:100px;padding-bottom:120px}.new-content h1{font-size:clamp(44px,7vw,80px);font-weight:500;line-height:1.2;margin:25px 0}.new-content p{color:var(--muted);font-size:16px}
 @media(max-width:600px){.site-header{gap:16px}nav{gap:16px;flex-wrap:wrap;justify-content:flex-end;font-size:13px}.new-content{padding-top:65px;padding-bottom:90px}}
+
+/* Light palette; playing cards retain their ivory paper in either theme. */
+:root[data-theme="light"]{color-scheme:light;--bg:#f5f3ed;--paper:#242c26;--muted:#646c60;--red:#c94e43;--line:#d5d8ce}
+[data-theme="light"] .hero p,[data-theme="light"] .about-intro{color:#626a60}
+[data-theme="light"] .card-face,[data-theme="light"] .fan-card{background:#fffdf5;color:#26322c}
+[data-theme="light"] .card-back{background:#e6e9db}
+[data-theme="light"] .red-group .fan-card{color:#b73f38}
+[data-theme="light"] #project-dialog{background:#f5f3ed;border-color:#c7cec0}
+[data-theme="light"] .tags span{border-color:#aeb6a6}
+[data-theme="light"] .poker-stage{background:radial-gradient(ellipse at center,#8b9a7440,transparent 65%)}
+
+.site-header nav{align-items:center}.theme-toggle{display:grid;place-items:center;width:36px;height:36px;flex:none;padding:0;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--paper);cursor:pointer;transition:transform .3s ease,background-color .3s ease,border-color .3s ease,color .3s ease}.theme-toggle:hover{transform:rotate(18deg);background:var(--line)}.theme-icon{display:block;font-size:21px;line-height:1}.theme-icon:before{content:'☀'}[data-theme="dark"] .theme-icon:before{content:'☾'}
+[data-theme-transition] body,[data-theme-transition] .site-header,[data-theme-transition] .hero,[data-theme-transition] .works,[data-theme-transition] .about,[data-theme-transition] .contact,[data-theme-transition] footer,[data-theme-transition] .suit-toggle,[data-theme-transition] .tags span,[data-theme-transition] #project-dialog,[data-theme-transition] .theme-toggle,[data-theme-transition] .hero p,[data-theme-transition] .about-intro{transition-property:background-color,color,border-color;transition-duration:.18s;transition-timing-function:ease-out}
+@media(max-width:600px){.theme-toggle{width:32px;height:32px}.theme-icon{font-size:19px}}
+@media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}

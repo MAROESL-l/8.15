@@ -93,7 +93,7 @@ try {
     object.position.set(x, y, z); object.castShadow = false; return object;
   }
 
-  scene.add(new THREE.HemisphereLight('#fff1d7', '#7c8773', 2.5));
+  const ambient=new THREE.HemisphereLight('#fff1d7', '#7c8773', 2.5);scene.add(ambient);
   const sun = new THREE.DirectionalLight('#ffe4b4', 4.2);
   sun.position.set(-3, 8, 5); sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
@@ -146,9 +146,11 @@ try {
   sphere(-.39,1.29,.15,.045,'#bca579',door,[1,1,.5]);
   rod([-.39,1.29,.19],[-.19,1.29,.19],.024,'#bca579',door);
   // A warm ceiling fixture lights the enclosed interior.
-  cylinder(.31,.31,.045,0,3.64,0,palette.edge);
-  cylinder(.36,.28,.12,0,3.57,0,'#ede1bf');
-  cylinder(.29,.29,.013,0,3.505,0,new THREE.MeshStandardMaterial({color:'#fff1ce',emissive:'#ffe3ab',emissiveIntensity:1.4}));
+  const ceilingFixture=new THREE.Group();scene.add(ceilingFixture);
+  cylinder(.31,.31,.045,0,3.64,0,palette.edge,ceilingFixture);
+  cylinder(.36,.28,.12,0,3.57,0,'#ede1bf',ceilingFixture);
+  const bulbMaterial=new THREE.MeshStandardMaterial({color:'#fff1ce',emissive:'#ffe3ab',emissiveIntensity:1.4});
+  cylinder(.29,.29,.013,0,3.505,0,bulbMaterial,ceilingFixture);
   const ceilingLight=new THREE.PointLight('#ffe8c5',12,10,2);ceilingLight.position.set(0,3.35,0);scene.add(ceilingLight);
 
   // Window, sunset landscape and soft linen curtains.
@@ -157,9 +159,38 @@ try {
     ctx.fillStyle = '#fff0c2'; ctx.beginPath(); ctx.arc(362, 174, 47, 0, Math.PI * 2); ctx.fill();
     ['#a7b4a0', '#829c8d', '#607e74'].forEach((color, i) => {ctx.fillStyle = color; ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(0,350+i*36);for(let x=0;x<=w;x+=8)ctx.lineTo(x,325+i*48+Math.sin(x/95+i*2)*32);ctx.lineTo(w,h);ctx.fill();});
   });
+  const nightSky = texture((ctx,w,h)=>{
+    const gradient=ctx.createLinearGradient(0,0,0,h);
+    gradient.addColorStop(0,'#101b39');gradient.addColorStop(.65,'#263b61');gradient.addColorStop(1,'#465571');
+    ctx.fillStyle=gradient;ctx.fillRect(0,0,w,h);
+    // A separate crescent silhouette, rather than a recoloured sun.
+    const glow=ctx.createRadialGradient(362,164,10,362,164,85);
+    glow.addColorStop(0,'#e0edff33');glow.addColorStop(1,'#e0edff00');
+    ctx.fillStyle=glow;ctx.fillRect(270,70,190,190);
+    const moonCanvas=document.createElement('canvas');
+    moonCanvas.width=w;moonCanvas.height=h;
+    const moon=moonCanvas.getContext('2d');
+    moon.fillStyle='#f4f0d5';moon.beginPath();moon.arc(362,164,44,0,Math.PI*2);moon.fill();
+    moon.globalCompositeOperation='destination-out';
+    moon.beginPath();moon.arc(382,151,40,0,Math.PI*2);moon.fill();
+    ctx.drawImage(moonCanvas,0,0);
+    for(let i=0;i<42;i++){
+      const x=24+(i*137)%464,y=24+(i*79)%255;
+      if(Math.hypot(x-362,y-164)<66)continue;
+      ctx.globalAlpha=.4+(i%4)*.18;ctx.fillStyle='#e6eeff';ctx.beginPath();ctx.arc(x,y,i%7===0?2:1.2,0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    ['#334968','#263c54','#1b3043'].forEach((color,i)=>{
+      ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(0,350+i*36);
+      for(let x=0;x<=w;x+=8)ctx.lineTo(x,325+i*48+Math.sin(x/95+i*2)*32);
+      ctx.lineTo(w,h);ctx.fill();
+    });
+  });
   box(2.82, 1.95, .12, 1.34, 2.35, -2.79, palette.edge, backWall);
   picture(2.62, 1.76, 1.34, 2.35, -2.718, sky, backWall);
   const glass = backWall.children[backWall.children.length - 1]; glass.material.emissive.set('#d2bc93'); glass.material.emissiveIntensity = .24;
+  const nightGlass=mesh(new THREE.PlaneGeometry(2.62,1.76),new THREE.MeshBasicMaterial({map:nightSky,transparent:true,opacity:0,depthWrite:false}),backWall);
+  nightGlass.position.set(1.34,2.35,-2.715);nightGlass.castShadow=false;nightGlass.receiveShadow=false;
   for (const x of [-.04, 1.34, 2.72]) box(.065, 1.94, .12, x, 2.35, -2.68, '#eee2c9', backWall);
   for (const y of [1.4, 2.35, 3.3]) box(2.8, .065, .12, 1.34, y, -2.68, '#eee2c9', backWall);
   box(3.08, .1, .33, 1.34, 1.38, -2.65, '#dfc7a1', backWall);
@@ -266,9 +297,10 @@ try {
   box(.58,.57,.57,-.82,.36,-.92,palette.wood);
   box(.63,.075,.63,-.82,.68,-.92,palette.lightWood);
   box(.47,.22,.02,-.82,.47,-.625,'#bf986d');sphere(-.82,.47,-.599,.027,palette.edge);
-  cylinder(.12,.13,.04,-.82,.745,-.92,palette.metal);
-  cylinder(.02,.02,.33,-.82,.91,-.92,palette.metal);
-  cylinder(.14,.24,.24,-.82,1.13,-.92,'#efe0b8');
+  const bedsideLamp=new THREE.Group();scene.add(bedsideLamp);
+  cylinder(.12,.13,.04,-.82,.745,-.92,palette.metal,bedsideLamp);
+  cylinder(.02,.02,.33,-.82,.91,-.92,palette.metal,bedsideLamp);
+  cylinder(.14,.24,.24,-.82,1.13,-.92,'#efe0b8',bedsideLamp);
 
   // Woven rug under the work chair.
   const rugMap = texture((ctx,w,h)=>{
@@ -296,16 +328,15 @@ try {
   rounded(.3,.006,.11,.002,0,.022,.16,'#929e9d',laptop);
   const lid = new THREE.Group(); lid.position.set(0,.015,-.238); lid.rotation.x=-.16; laptop.add(lid);
   rounded(.85,.56,.033,.012,0,.28,0,aluminum,lid);
-  const screenMap=texture((ctx,w,h)=>{
-    ctx.fillStyle='#17232b';ctx.fillRect(0,0,w,h);ctx.fillStyle='#2b3942';ctx.fillRect(0,0,w,24);ctx.fillStyle='#24323b';ctx.fillRect(0,24,92,h);
-    ['#e37d70','#eac37c','#83b89f'].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(14+i*17,12,4,0,7);ctx.fill();});
-    ctx.font='14px monospace';ctx.fillStyle='#a9bdb8';ctx.fillRect(112,45,180,6);
-    const lines=['const life = {', '  curiosity: true,', '  coffee: "always",', '  music: "on repeat"', '};', '', 'function makeSomething() {', '  return aLittleJoy;', '}', '', '// one good day at a time'];
-    lines.forEach((line,i)=>{ctx.fillStyle=i===10?'#718e83':i%3===0?'#d4b58a':i%3===1?'#91bda9':'#a8bcd7';if(line)ctx.fillRect(112+(line.startsWith('  ')?18:0),78+i*19,line.length*6,5);ctx.fillStyle='#60727b';ctx.fillRect(96,78+i*19,5,5);});
-    ctx.fillStyle='#90bfa9';ctx.fillRect(0,h-15,w,15);ctx.fillStyle='#7f948b';for(let i=0;i<7;i++)ctx.fillRect(14,48+i*23,48-(i%3)*7,4);
-  },640,400);
-  const screen=picture(.77,.47,0,.292,.02,screenMap,lid);
-  screen.material.emissive.set('#9ac5bd');screen.material.emissiveMap=screenMap;screen.material.emissiveIntensity=.5;
+  const screenLoader=new THREE.TextureLoader();
+  const screenMaps=['light','dark'].map(theme=>{
+    const map=screenLoader.load(`images/room-home-${theme}.png`);
+    map.colorSpace=THREE.SRGBColorSpace;
+    map.anisotropy=renderer.capabilities.getMaxAnisotropy();
+    return map;
+  });
+  const screen=picture(.77,.47,0,.292,.02,screenMaps[0],lid);
+  screen.material.emissive.set('#ffffff');screen.material.emissiveMap=screenMaps[0];screen.material.emissiveIntensity=.38;
   // Small recognisable apple silhouette on the lid's reverse.
   const apple = new THREE.Group(); apple.position.set(0,.29,-.022); lid.add(apple);
   sphere(-.018,0,0,.034,'#e5e9e7',apple,[.85,1,.1]);sphere(.021,0,0,.034,'#e5e9e7',apple,[.85,1,.1]);
@@ -317,11 +348,12 @@ try {
   box(.32,.019,.41,.26,1.49,-1.52,palette.paper).rotation.y=-.12;
   rod([.22,1.513,-1.65],[.35,1.513,-1.42],.012,palette.dark);
   // Angled task lamp.
-  cylinder(.15,.17,.045,2.3,1.47,-1.99,palette.green);
-  rod([2.3,1.49,-1.99],[2.3,2.08,-1.99],.025,palette.green);
-  rod([2.3,2.08,-1.99],[1.96,2.25,-1.89],.027,palette.green);
-  const shade=cylinder(.095,.18,.18,1.93,2.21,-1.88,palette.green);shade.rotation.z=-.25;
-  cylinder(.145,.145,.012,1.907,2.12,-1.88,new THREE.MeshStandardMaterial({color:'#fff0bc',emissive:'#ffd68a',emissiveIntensity:1}));
+  const deskLamp=new THREE.Group();scene.add(deskLamp);
+  cylinder(.15,.17,.045,2.3,1.47,-1.99,palette.green,deskLamp);
+  rod([2.3,1.49,-1.99],[2.3,2.08,-1.99],.025,palette.green,deskLamp);
+  rod([2.3,2.08,-1.99],[1.96,2.25,-1.89],.027,palette.green,deskLamp);
+  const shade=cylinder(.095,.18,.18,1.93,2.21,-1.88,palette.green,deskLamp);shade.rotation.z=-.25;
+  cylinder(.145,.145,.012,1.907,2.12,-1.88,new THREE.MeshStandardMaterial({color:'#fff0bc',emissive:'#ffd68a',emissiveIntensity:1}),deskLamp);
   const lampLight=new THREE.PointLight('#ffe0a1',.6,3);lampLight.position.set(1.92,2.05,-1.83);scene.add(lampLight);
 
   // Chair and a seated person. Both forearms have a pivot at the elbow.
@@ -393,11 +425,82 @@ try {
   box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
   picture(.47,.51,-.42,1.42,-.321,sleeve,recordGroup);
   plant(2.9,.09,-2.03,1.4);
-  // Small ottoman and a book add a lived-in corner.
+  // Small ottoman with a slowly rotating Earth globe.
   cylinder(.39,.35,.37,-.39,.28,1.91,'#bf805e');
   cylinder(.39,.39,.09,-.39,.49,1.91,'#d29a73');
-  box(.32,.045,.4,-.39,.56,1.91,palette.green).rotation.y=.24;
-  box(.29,.023,.37,-.39,.589,1.91,palette.paper).rotation.y=.24;
+  cylinder(.13,.16,.022,-.39,.548,1.91,material('#263c45',.3,.65),scene,48);
+  cylinder(.018,.025,.065,-.39,.59,1.91,material('#8abcca',.28,.65));
+  const globe=new THREE.Group();globe.position.set(-.39,.79,1.91);scene.add(globe);
+  // NASA Blue Marble Next Generation, September: global topography composite.
+  const globeMap=new THREE.TextureLoader().load('images/earth-blue-marble.jpg',loaded=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=loaded.image.width;canvas.height=loaded.image.height;
+    const context=canvas.getContext('2d');
+    context.drawImage(loaded.image,0,0);
+    const pixels=context.getImageData(0,0,canvas.width,canvas.height);
+    for(let i=0;i<pixels.data.length;i+=4){
+      const red=pixels.data[i],green=pixels.data[i+1],blue=pixels.data[i+2];
+      const ocean=Math.min(1,Math.max(0,(blue-Math.max(red,green)-2)/6));
+      if(!ocean)continue;
+      pixels.data[i]=red+(20+red*.5-red)*ocean;
+      pixels.data[i+1]=green+(67+green*.5-green)*ocean;
+      pixels.data[i+2]=blue+(108+blue*.6-blue)*ocean;
+    }
+    context.putImageData(pixels,0,0);
+    loaded.image=canvas;loaded.needsUpdate=true;
+  });
+  globeMap.colorSpace=THREE.SRGBColorSpace;
+  const earth=mesh(new THREE.SphereGeometry(.17,48,32),new THREE.MeshBasicMaterial({map:globeMap,toneMapped:false}),globe);
+  earth.castShadow=false;
+  const gridMaterial=new THREE.LineBasicMaterial({color:'#c8e1e9',transparent:true,opacity:.28,depthWrite:false,toneMapped:false});
+  const referenceMaterial=new THREE.LineBasicMaterial({color:'#e2f2f5',transparent:true,opacity:.42,depthWrite:false,toneMapped:false});
+  const gridRadius=.172;
+  // The map is equirectangular: its center is 0° longitude, with north at the top.
+  function globePoint(longitude,latitude){
+    const lon=THREE.MathUtils.degToRad(longitude),lat=THREE.MathUtils.degToRad(latitude);
+    return new THREE.Vector3(gridRadius*Math.cos(lat)*Math.cos(lon),gridRadius*Math.sin(lat),-gridRadius*Math.cos(lat)*Math.sin(lon));
+  }
+  for(const latitude of [-60,-30,0,30,60]){
+    const points=[];
+    for(let step=0;step<120;step++)points.push(globePoint(-180+step*3,latitude));
+    globe.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(points),latitude===0?referenceMaterial:gridMaterial));
+  }
+  for(let longitude=-180;longitude<180;longitude+=30){
+    const points=[];
+    for(let latitude=-90;latitude<=90;latitude+=3)points.push(globePoint(longitude,latitude));
+    globe.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),longitude===0?referenceMaterial:gridMaterial));
+  }
+
+  let themeBlend=window.roomTheme.value==='dark'?1:0;
+  let themeTarget=themeBlend;
+  const darkAmbient=new THREE.Color('#9badcd');
+  const darkGround=new THREE.Color('#303c52');
+  const darkFill=new THREE.Color('#829ed5');
+  const darkBulb=new THREE.Color('#687182');
+  function updateRoomTheme(t){
+    ambient.intensity=THREE.MathUtils.lerp(2.5,.65,t);
+    ambient.color.set('#fff1d7').lerp(darkAmbient,t);
+    ambient.groundColor.set('#7c8773').lerp(darkGround,t);
+    sun.intensity=THREE.MathUtils.lerp(4.2,.25,t);
+    fill.intensity=THREE.MathUtils.lerp(1.4,.45,t);
+    fill.color.set('#d5e7ee').lerp(darkFill,t);
+    ceilingLight.intensity=THREE.MathUtils.lerp(12,0,t);
+    bulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(1.4,0,t);
+    bulbMaterial.color.set('#fff1ce').lerp(darkBulb,t);
+    lampLight.intensity=THREE.MathUtils.lerp(.6,1.2,t);
+    nightGlass.material.opacity=t;
+    renderer.toneMappingExposure=THREE.MathUtils.lerp(1.12,.95,t);
+  }
+  function applyRoomTheme(){
+    themeTarget=window.roomTheme.value==='dark'?1:0;
+    screen.material.map=screenMaps[themeTarget];
+    screen.material.emissiveMap=screenMaps[themeTarget];
+    screen.material.needsUpdate=true;
+    if(reducedMotion.matches)themeBlend=themeTarget;
+    updateRoomTheme(themeBlend);
+  }
+  applyRoomTheme();
+  window.addEventListener('themechange',applyRoomTheme);
 
   let animated = !reducedMotion.matches;
   let elapsed = 0, lastTime = 0, frame = null;
@@ -405,24 +508,54 @@ try {
   function resetView(){eye.set(.2,1.95,2.35);yaw=targetYaw=-.045;pitch=targetPitch=-.14;controls.update();}
   const raycaster=new THREE.Raycaster();
   const pointer=new THREE.Vector2();
-  function hitsComputer(event){
+  const homePreview=document.querySelector('#home-preview');
+  const previewAnchor=new THREE.Vector3();
+  let previewVisible=false;
+  function setHomePreview(visible){
+    if(previewVisible===visible)return;
+    previewVisible=visible;
+    homePreview.classList.toggle('is-visible',visible);
+    homePreview.setAttribute('aria-hidden',String(!visible));
+  }
+  function updateHomePreview(){
+    if(!previewVisible)return;
+    laptop.localToWorld(previewAnchor.set(0,.32,-.22));
+    previewAnchor.project(camera);
+    if(previewAnchor.z>1){setHomePreview(false);return;}
+    const bounds=host.getBoundingClientRect();
+    const x=bounds.left+(previewAnchor.x+1)*bounds.width/2;
+    const y=bounds.top+(1-previewAnchor.y)*bounds.height/2;
+    const panelWidth=Math.min(400,innerWidth-24);
+    const besideRight=x+32+panelWidth<=innerWidth-12;
+    const panelX=besideRight?x+32:Math.max(12,x-panelWidth-32);
+    homePreview.style.setProperty('--preview-x',`${panelX}px`);
+    homePreview.style.setProperty('--preview-y',`${Math.max(12,Math.min(y-190,innerHeight-Math.min(570,innerHeight-24)-12))}px`);
+  }
+  function interactiveTarget(event){
     const bounds=host.getBoundingClientRect();
     pointer.set((event.clientX-bounds.left)/bounds.width*2-1,-(event.clientY-bounds.top)/bounds.height*2+1);
     scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
     raycaster.setFromCamera(pointer,camera);
     // The nearest visible surface must belong to the laptop; do not click through a person or wall.
     let object=raycaster.intersectObjects(scene.children,true)[0]?.object;
-    while(object){if(object===laptop)return true;object=object.parent;}
-    return false;
+    while(object){if(object===laptop)return 'computer';if((object===bedsideLamp||object===deskLamp))return 'light';object=object.parent;}
+    return null;
   }
   let drag=null;
   host.addEventListener('pointerdown',event=>{
     if(!event.isPrimary || event.button!==0)return;
     host.focus({preventScroll:true});host.setPointerCapture(event.pointerId);
-    drag={id:event.pointerId,x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,moved:false,computer:hitsComputer(event)};
+    drag={id:event.pointerId,x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,moved:false,target:interactiveTarget(event)};
   });
   host.addEventListener('pointermove',event=>{
-    if(!drag){host.style.cursor=hitsComputer(event)?'pointer':'grab';return;}
+    if(!drag){
+      const target=interactiveTarget(event);
+      host.style.cursor=target?'pointer':'grab';
+      setHomePreview(target==='computer');
+      if(previewVisible)updateHomePreview();
+      return;
+    }
+    setHomePreview(false);
     if(drag.id!==event.pointerId)return;
     if(Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)>6)drag.moved=true;
     if(!drag.moved)return;
@@ -436,13 +569,15 @@ try {
   });
   function endDrag(event){
     if(drag?.id!==event.pointerId)return;
-    const activate=event.type==='pointerup'&&!drag.moved&&Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)<=6&&drag.computer&&hitsComputer(event);
+    const activate=event.type==='pointerup'&&!drag.moved&&Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)<=6&&drag.target&&drag.target===interactiveTarget(event);
+    const action=drag.target;
     drag=null;host.style.cursor='grab';
     if(host.hasPointerCapture(event.pointerId))host.releasePointerCapture(event.pointerId);
-    if(activate)window.location.assign('index.html');
+    if(activate&&action==='computer')window.location.assign('index.html');
+    if(activate&&action==='light')window.roomTheme.toggle();
   }
   ['pointerup','pointercancel','lostpointercapture'].forEach(type=>host.addEventListener(type,endDrag));
-  host.addEventListener('pointerleave',()=>{if(!drag)host.style.cursor='grab';});
+  host.addEventListener('pointerleave',()=>{if(!drag)host.style.cursor='grab';setHomePreview(false);});
   // Floor-plan collision volumes include the space occupied by the seated person.
   const obstacles = [
     [-3.24,-1.2,-1.3,1.85], // bed
@@ -475,6 +610,7 @@ try {
   const heldKeys=new Set();
   const movementKeys=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'];
   host.addEventListener('keydown',event=>{
+    if(event.code==='KeyL'){event.preventDefault();if(!event.repeat)window.roomTheme.toggle();return;}
     if(movementKeys.includes(event.code)){event.preventDefault();heldKeys.add(event.code);return;}
     if(event.code==='Space'){event.preventDefault();if(!event.repeat)animated=!animated;return;}
     if(event.key==='Home'){event.preventDefault();heldKeys.clear();resetView();}
@@ -505,8 +641,13 @@ try {
     const delta=lastTime?Math.min((time-lastTime)/1000,.05):0;lastTime=time;
     updateWalking(delta);
     controls.update();
+    if(Math.abs(themeTarget-themeBlend)>.001){
+      themeBlend+=(themeTarget-themeBlend)*(reducedMotion.matches?1:Math.min(1,delta*14));
+      updateRoomTheme(themeBlend);
+    }
+    updateHomePreview();
     if(animated){
-      elapsed+=delta;vinyl.rotation.y=-elapsed*3.49;
+      elapsed+=delta;vinyl.rotation.y=-elapsed*3.49;globe.rotation.y=elapsed*.28;
       forearms.forEach((arm,i)=>{arm.rotation.x=(1+Math.sin(elapsed*12+i*Math.PI))*.007;});
       head.rotation.x=.13+Math.sin(elapsed*1.9)*.018;head.rotation.z=Math.sin(elapsed*.7)*.018;
       torso.scale.y=1+Math.sin(elapsed*2)*.006;
