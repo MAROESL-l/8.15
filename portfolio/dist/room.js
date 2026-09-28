@@ -308,8 +308,8 @@ try {
   box(.445,.018,.45,0,.17,.035,palette.lightWood,lowerBedsideDrawer);
   for(const x of [-.215,.215])box(.018,.105,.45,x,.23,.035,palette.wood,lowerBedsideDrawer);
   box(.445,.105,.018,0,.23,-.185,palette.wood,lowerBedsideDrawer);
-  rounded(.49,.19,.035,.012,0,.23,.286,'#bf986d',lowerBedsideDrawer);
-  sphere(0,.23,.32,.027,palette.edge,lowerBedsideDrawer);
+  rounded(.49,.225,.035,.012,0,.245,.286,'#bf986d',lowerBedsideDrawer);
+  sphere(0,.245,.32,.027,palette.edge,lowerBedsideDrawer);
   slidingDrawers.push({group:lowerBedsideDrawer,travel:.34,open:false});
   // Little reading lamp on the bedside cabinet.
   const bedsideLamp=new THREE.Group();scene.add(bedsideLamp);
@@ -383,9 +383,14 @@ try {
   cylinder(.15,.17,.045,2.3,1.47,-1.99,palette.green,deskLamp);
   rod([2.3,1.49,-1.99],[2.3,2.08,-1.99],.025,palette.green,deskLamp);
   rod([2.3,2.08,-1.99],[1.96,2.25,-1.89],.027,palette.green,deskLamp);
-  const shade=cylinder(.095,.18,.18,1.93,2.21,-1.88,palette.green,deskLamp);shade.rotation.z=-.25;
-  cylinder(.145,.145,.012,1.907,2.12,-1.88,new THREE.MeshStandardMaterial({color:'#fff0bc',emissive:'#ffd68a',emissiveIntensity:1}),deskLamp);
-  const lampLight=new THREE.PointLight('#ffe0a1',.6,3);lampLight.position.set(1.92,2.05,-1.83);scene.add(lampLight);
+  const deskShade=new THREE.Group();deskShade.position.set(1.93,2.21,-1.88);deskShade.rotation.z=-.25;deskLamp.add(deskShade);
+  mesh(new THREE.CylinderGeometry(.095,.18,.18,32,1,true),new THREE.MeshStandardMaterial({color:palette.green,roughness:.8,side:THREE.DoubleSide}),deskShade);
+  mesh(new THREE.CylinderGeometry(.086,.168,.171,32,1,true),new THREE.MeshStandardMaterial({color:'#e9dfbc',roughness:.7,side:THREE.DoubleSide}),deskShade);
+  const shadeRim=mesh(new THREE.TorusGeometry(.174,.008,8,32),palette.green,deskShade);shadeRim.rotation.x=Math.PI/2;shadeRim.position.y=-.09;
+  cylinder(.025,.025,.085,0,-.035,0,palette.metal,deskShade);
+  const deskBulbMaterial=new THREE.MeshStandardMaterial({color:'#fff1ce',emissive:'#ffd68a',emissiveIntensity:1.1,roughness:.25});
+  sphere(0,-.115,0,.06,deskBulbMaterial,deskShade,[.82,1,.82]);
+  const lampLight=new THREE.PointLight('#ffe0a1',.6,3);lampLight.position.set(1.905,2.1,-1.88);scene.add(lampLight);
 
   // Desk chair.
   const chair = new THREE.Group(); chair.position.set(1.12,0,-.46);scene.add(chair);
@@ -394,7 +399,7 @@ try {
   rounded(.77,.15,.68,.06,0,.7,0,palette.terracotta,chair);
   rod([-.29,.69,.23],[-.29,1.21,.36],.025,palette.metal,chair);rod([.29,.69,.23],[.29,1.21,.36],.025,palette.metal,chair);
   rounded(.79,.56,.14,.06,0,1.11,.34,'#b97051',chair).rotation.x=-.1;
-  // Record cabinet with spinning vinyl, tonearm, speakers and sleeve art.
+  // Record cabinet with vertically stored sleeves and a working turntable.
   const recordGroup=new THREE.Group();recordGroup.position.set(2.63,0,1.53);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
   for(const x of [-.59,.59])for(const z of [-.3,.3])cylinder(.035,.025,.22,x,.18,z,palette.edge,recordGroup);
   box(1.42,.75,.8,0,.65,0,palette.wood,recordGroup);
@@ -405,23 +410,35 @@ try {
     {title:'午夜频率',subtitle:'MIDNIGHT RADIO',background:'#263c49',accent:'#f0a267'},
     {title:'城市漫游',subtitle:'CITY WALK',background:'#936652',accent:'#f5dfb8'},
     {title:'海岸线',subtitle:'COASTLINE',background:'#527a78',accent:'#eac985'},
-    {title:'慢慢来',subtitle:'SLOW DAYS',background:'#756b89',accent:'#f3c5a5'}
+    {title:'慢慢来',subtitle:'SLOW DAYS',background:'#756b89',accent:'#f3c5a5'},
+    {title:'赤与青',subtitle:'RED & BLUE',background:'#364a65',accent:'#db765e'},
+    {title:'日落之后',subtitle:'AFTER SUNSET',background:'#704f4c',accent:'#f1b77c'},
+    {title:'微光',subtitle:'GLIMMER',background:'#536454',accent:'#d9ddaa'},
+    {title:'远方',subtitle:'FAR AWAY',background:'#546b82',accent:'#d6c3a2'}
   ];
-  const recordCovers=[];
+  const recordCovers=[],recordJackets=[],recordHitTargets=[];
   records.forEach((record,index)=>{
     const cover=texture((ctx,w,h)=>{
       ctx.fillStyle=record.background;ctx.fillRect(0,0,w,h);
       ctx.fillStyle=record.accent;
-      if(index===0){ctx.beginPath();ctx.arc(w*.52,h*.43,w*.27,0,Math.PI*2);ctx.fill();ctx.fillStyle=record.background;ctx.beginPath();ctx.arc(w*.52,h*.43,w*.16,0,Math.PI*2);ctx.fill();}
-      if(index===1){for(let i=0;i<6;i++)ctx.fillRect(50+i*76,95+(i%3)*35,40,250-(i%3)*35);}
-      if(index===2){for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(w*.5,h*.58+i*42,w*.45+i*35,Math.PI,Math.PI*2);ctx.strokeStyle=record.accent;ctx.lineWidth=16;ctx.stroke();}}
-      if(index===3){ctx.beginPath();ctx.arc(w*.5,h*.42,w*.25,0,Math.PI*2);ctx.fill();ctx.fillRect(0,h*.43,w,h*.08);}
+      if(index%4===0){ctx.beginPath();ctx.arc(w*.52,h*.43,w*.27,0,Math.PI*2);ctx.fill();ctx.fillStyle=record.background;ctx.beginPath();ctx.arc(w*.52,h*.43,w*.16,0,Math.PI*2);ctx.fill();}
+      if(index%4===1){for(let i=0;i<6;i++)ctx.fillRect(50+i*76,95+(i%3)*35,40,250-(i%3)*35);}
+      if(index%4===2){for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(w*.5,h*.58+i*42,w*.45+i*35,Math.PI,Math.PI*2);ctx.strokeStyle=record.accent;ctx.lineWidth=16;ctx.stroke();}}
+      if(index%4===3){ctx.beginPath();ctx.arc(w*.5,h*.42,w*.25,0,Math.PI*2);ctx.fill();ctx.fillRect(0,h*.43,w,h*.08);}
       ctx.fillStyle='#fff8e9';ctx.font='bold 52px sans-serif';ctx.textAlign='left';ctx.fillText(record.title,32,h-98);
       ctx.font='24px sans-serif';ctx.fillText(record.subtitle,34,h-54);
     });
-    const jacket=new THREE.Group();jacket.position.set([-.46,-.2,.2,.46][index],.65,.45);jacket.rotation.y=[-.07,.04,-.04,.07][index];jacket.userData.recordIndex=index;recordGroup.add(jacket);
-    box(.225,.44,.025,0,0,0,palette.paper,jacket);
-    picture(.215,.43,0,0,.014,cover,jacket);
+    const x=[-.52,-.4,-.28,-.16,.16,.28,.4,.52][index];
+    const jacket=new THREE.Group();jacket.position.set(x,.65,.22);jacket.userData.recordIndex=index;recordGroup.add(jacket);
+    box(.066,.44,.42,0,0,0,record.background,jacket);
+    const coverFace=picture(.405,.415,.034,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
+    box(.046,.4,.008,0,0,.214,record.accent,jacket);
+    box(.034,.06,.009,0,-.15,.22,palette.paper,jacket);
+    const hit=mesh(new THREE.PlaneGeometry(.105,.45),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),recordGroup);
+    hit.position.set(x,.65,.453);hit.userData.recordIndex=index;
+    hit.castShadow=false;hit.receiveShadow=false;
+    recordHitTargets.push(hit);
+    recordJackets.push(jacket);
     recordCovers.push(cover.image.toDataURL('image/png'));
   });
   const recordPlayer=new THREE.Group();recordGroup.add(recordPlayer);
@@ -441,8 +458,6 @@ try {
   cylinder(.019,.019,.012,-.52,1.211,.24,'#d3bc84',recordPlayer);
   const powerLight=material('#544c3b',.45);
   cylinder(.019,.019,.012,.26,1.211,.24,powerLight,recordPlayer);
-  box(.26,.43,.31,.55,1.31,-.08,palette.dark,recordGroup);
-  for(const y of [1.22,1.42]){const speaker=cylinder(.077,.077,.015,.55,y,.084,'#101e1e',recordGroup);speaker.rotation.x=Math.PI/2;sphere(.55,y,.098,.033,'#58665c',recordGroup,[1,1,.25]);}
   const sleeve=texture((ctx,w,h)=>{ctx.fillStyle='#d9ad74';ctx.fillRect(0,0,w,h);ctx.fillStyle='#354b40';ctx.beginPath();ctx.arc(w*.5,h*.51,w*.32,0,7);ctx.fill();ctx.fillStyle='#d9ad74';ctx.beginPath();ctx.arc(w*.5,h*.51,w*.1,0,7);ctx.fill();ctx.font='32px Georgia';ctx.textAlign='center';ctx.fillStyle='#354b40';ctx.font='17px Georgia';});
   box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
   picture(.47,.51,-.42,1.42,-.321,sleeve,recordGroup);
@@ -510,6 +525,7 @@ try {
     bulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(1.4,0,t);
     bulbMaterial.color.set('#fff1ce').lerp(darkBulb,t);
     lampLight.intensity=THREE.MathUtils.lerp(.6,1.2,t);
+    deskBulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(.75,1.8,t);
     nightGlass.material.opacity=t;
     renderer.toneMappingExposure=THREE.MathUtils.lerp(1.12,.95,t);
   }
@@ -608,6 +624,8 @@ try {
     pointer.set((event.clientX-bounds.left)/bounds.width*2-1,-(event.clientY-bounds.top)/bounds.height*2+1);
     scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
     raycaster.setFromCamera(pointer,camera);
+    const spineHit=raycaster.intersectObjects(recordHitTargets,false)[0];
+    if(spineHit)return `record-${spineHit.object.userData.recordIndex}`;
     // The nearest visible surface must belong to the laptop.
     let object=raycaster.intersectObjects(scene.children,true)[0]?.object;
     while(object){
@@ -743,6 +761,12 @@ try {
       const target=drawer.open?drawer.travel:0;
       drawer.group.position.z=reducedMotion.matches?target:THREE.MathUtils.damp(drawer.group.position.z,target,12,delta);
     }
+    recordJackets.forEach((jacket,index)=>{
+      const selected=index===previewRecordIndex;
+      const z=selected?.62:.22,angle=selected?-Math.PI/2:0;
+      jacket.position.z=reducedMotion.matches?z:THREE.MathUtils.damp(jacket.position.z,z,13,delta);
+      jacket.rotation.y=reducedMotion.matches?angle:THREE.MathUtils.damp(jacket.rotation.y,angle,13,delta);
+    });
     if(recordPlaying&&!reducedMotion.matches)vinyl.rotation.y-=delta*3.49;
     tonearm.rotation.y=reducedMotion.matches?(recordPlaying?-.42:0):THREE.MathUtils.damp(tonearm.rotation.y,recordPlaying?-.42:0,6,delta);
     if(animated){elapsed+=delta;globe.rotation.y=elapsed*.28;}
