@@ -299,9 +299,9 @@ try {
   box(.63,.075,.63,0,.68,0,palette.lightWood,bedsideCabinet);
   const bedsideDrawer=new THREE.Group();bedsideCabinet.add(bedsideDrawer);
   box(.445,.018,.45,0,.375,.035,palette.lightWood,bedsideDrawer);
-  for(const x of [-.215,.215])box(.018,.125,.45,x,.445,.035,palette.wood,bedsideDrawer);
-  box(.445,.125,.018,0,.445,-.185,palette.wood,bedsideDrawer);
-  rounded(.49,.22,.035,.012,0,.475,.286,'#bf986d',bedsideDrawer);
+  for(const x of [-.215,.215])box(.018,.245,.45,x,.5,.035,palette.wood,bedsideDrawer);
+  box(.445,.245,.018,0,.5,-.185,palette.wood,bedsideDrawer);
+  rounded(.49,.278,.035,.012,0,.505,.286,'#bf986d',bedsideDrawer);
   sphere(0,.475,.32,.027,palette.edge,bedsideDrawer);
   slidingDrawers.push({group:bedsideDrawer,travel:.34,open:false});
   const lowerBedsideDrawer=new THREE.Group();bedsideCabinet.add(lowerBedsideDrawer);
