@@ -359,7 +359,7 @@ try {
     map.anisotropy=renderer.capabilities.getMaxAnisotropy();
     return map;
   });
-  const screen=picture(.77,.47,0,.292,.02,screenMaps[0],lid);
+  const screen=picture(.81,.515,0,.285,.02,screenMaps[0],lid);
   screen.material.emissive.set('#ffffff');screen.material.emissiveMap=screenMaps[0];screen.material.emissiveIntensity=.38;
   // Small recognisable apple silhouette on the lid's reverse.
   const apple = new THREE.Group(); apple.position.set(0,.29,-.022); lid.add(apple);
