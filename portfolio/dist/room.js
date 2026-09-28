@@ -375,9 +375,13 @@ try {
   water.rotation.x=-Math.PI/2;
   water.position.set(2.04,1.585,-1.47);
   const handle=mesh(new THREE.TorusGeometry(.073,.022,8,20),'#e8e0c9');handle.position.set(2.15,1.53,-1.47);
-  box(.35,.045,.44,.26,1.46,-1.52,palette.terracotta).rotation.y=-.12;
-  box(.32,.019,.41,.26,1.49,-1.52,palette.paper).rotation.y=-.12;
-  rod([.22,1.513,-1.65],[.35,1.513,-1.42],.012,palette.dark);
+  const notebook=new THREE.Group();scene.add(notebook);
+  box(.35,.045,.44,.26,1.46,-1.52,palette.terracotta,notebook).rotation.y=-.12;
+  box(.32,.019,.41,.26,1.49,-1.52,palette.paper,notebook).rotation.y=-.12;
+  rod([.22,1.513,-1.65],[.35,1.513,-1.42],.012,palette.dark,notebook);
+  const notebookHit=mesh(new THREE.PlaneGeometry(.43,.5),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false,side:THREE.DoubleSide}),notebook);
+  notebookHit.position.set(.26,1.535,-1.52);notebookHit.rotation.x=-Math.PI/2;
+  notebookHit.castShadow=false;notebookHit.receiveShadow=false;
   // Angled task lamp.
   const deskLamp=new THREE.Group();scene.add(deskLamp);
   cylinder(.15,.17,.045,2.3,1.47,-1.99,palette.green,deskLamp);
@@ -582,6 +586,33 @@ try {
   const pointer=new THREE.Vector2();
   const homePreview=document.querySelector('#home-preview');
   const recordPreview=document.querySelector('#record-preview');
+  const retirementPreview=document.querySelector('#retirement-preview');
+  const retirementDays=retirementPreview.querySelector('#retirement-days');
+  const retirementClock=retirementPreview.querySelector('#retirement-clock');
+  // 2067-06-22 00:00 in China Standard Time: the 63rd birthday under current policy.
+  const retirementAt=new Date('2067-06-22T00:00:00+08:00').getTime();
+  let retirementVisible=false,retirementTimer=null;
+  function updateRetirementCountdown(){
+    let remaining=Math.max(0,retirementAt-Date.now());
+    const days=Math.floor(remaining/86400000);remaining%=86400000;
+    const hours=Math.floor(remaining/3600000);remaining%=3600000;
+    const minutes=Math.floor(remaining/60000);
+    const seconds=Math.floor(remaining%60000/1000);
+    retirementDays.textContent=days.toLocaleString('zh-CN');
+    retirementClock.textContent=`${String(hours).padStart(2,'0')} 时 ${String(minutes).padStart(2,'0')} 分 ${String(seconds).padStart(2,'0')} 秒`;
+  }
+  function setRetirementPreview(visible,event){
+    if(visible&&event){
+      retirementPreview.style.setProperty('--retirement-x',`${Math.max(12,Math.min(event.clientX+22,innerWidth-312))}px`);
+      retirementPreview.style.setProperty('--retirement-y',`${Math.max(12,Math.min(event.clientY+18,innerHeight-215))}px`);
+    }
+    if(retirementVisible===visible)return;
+    retirementVisible=visible;
+    retirementPreview.classList.toggle('is-visible',visible);
+    retirementPreview.setAttribute('aria-hidden',String(!visible));
+    if(visible){updateRetirementCountdown();retirementTimer=setInterval(updateRetirementCountdown,1000);}
+    else{clearInterval(retirementTimer);retirementTimer=null;}
+  }
   const recordPreviewImage=recordPreview.querySelector('img');
   let previewRecordIndex=-1;
   function setRecordPreview(index,event){
@@ -640,6 +671,7 @@ try {
     while(object){
       if(Number.isInteger(object.userData.recordIndex))return `record-${object.userData.recordIndex}`;
       if(object===recordPlayer)return 'record-player';
+      if(object===notebook)return 'notebook';
       if(object===laptop)return 'computer';
       if(object===bedsideLamp||object===deskLamp)return 'light';
       if(object===bedsideDrawer)return 'bedside-drawer';
@@ -652,6 +684,7 @@ try {
   let drag=null;
   host.addEventListener('pointerdown',event=>{
     if(!event.isPrimary || event.button!==0)return;
+    setRetirementPreview(false);
     setRecordPreview(-1,event);
     host.focus({preventScroll:true});host.setPointerCapture(event.pointerId);
     drag={id:event.pointerId,x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,moved:false,target:interactiveTarget(event)};
@@ -659,13 +692,15 @@ try {
   host.addEventListener('pointermove',event=>{
     if(!drag){
       const target=interactiveTarget(event);
-      host.style.cursor=/^record-\d+$/.test(target)?'zoom-in':target?'pointer':'grab';
+      host.style.cursor=/^record-\d+$/.test(target)?'zoom-in':target==='notebook'?'help':target?'pointer':'grab';
       setHomePreview(target==='computer');
+      setRetirementPreview(target==='notebook',event);
       setRecordPreview(/^record-\d+$/.test(target)?Number(target.slice(7)):-1,event);
       if(previewVisible)updateHomePreview();
       return;
     }
     setHomePreview(false);
+    setRetirementPreview(false);
     setRecordPreview(-1,event);
     if(drag.id!==event.pointerId)return;
     if(Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)>6)drag.moved=true;
@@ -693,7 +728,7 @@ try {
     if(activate&&action==='record-player')toggleRecord();
   }
   ['pointerup','pointercancel','lostpointercapture'].forEach(type=>host.addEventListener(type,endDrag));
-  host.addEventListener('pointerleave',event=>{if(!drag)host.style.cursor='grab';setHomePreview(false);setRecordPreview(-1,event);});
+  host.addEventListener('pointerleave',event=>{if(!drag)host.style.cursor='grab';setHomePreview(false);setRetirementPreview(false);setRecordPreview(-1,event);});
   // Floor-plan collision volumes for furniture.
   const obstacles = [
     [-3.24,-1.2,-1.3,1.85], // bed
@@ -736,9 +771,9 @@ try {
     if(event.key==='Home'){event.preventDefault();heldKeys.clear();resetView();}
   });
   window.addEventListener('keyup',event=>heldKeys.delete(event.code));
-  window.addEventListener('blur',()=>{heldKeys.clear();drag=null;host.style.cursor='grab';setRecordPreview(-1);});
+  window.addEventListener('blur',()=>{heldKeys.clear();drag=null;host.style.cursor='grab';setRetirementPreview(false);setRecordPreview(-1);});
   host.addEventListener('blur',()=>heldKeys.clear());
-  document.addEventListener('visibilitychange',()=>heldKeys.clear());
+  document.addEventListener('visibilitychange',()=>{heldKeys.clear();if(document.hidden)setRetirementPreview(false);});
   host.addEventListener('wheel',event=>{
     if(event.ctrlKey)return;
     event.preventDefault();
