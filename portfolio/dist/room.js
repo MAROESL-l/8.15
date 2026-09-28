@@ -422,7 +422,15 @@ try {
     {title:'风的来信',subtitle:'WIND LETTERS',background:'#8a765d',accent:'#f3dca6'},
     {title:'静夜',subtitle:'QUIET NIGHT',background:'#3f455c',accent:'#c6b8d3'},
     {title:'温度',subtitle:'WARMTH',background:'#895946',accent:'#efb98b'},
-    {title:'飞行日记',subtitle:'FLIGHT LOG',background:'#5b7882',accent:'#ddd5b7'}
+    {title:'飞行日记',subtitle:'FLIGHT LOG',background:'#5b7882',accent:'#ddd5b7'},
+    {title:'雨后',subtitle:'AFTER RAIN',background:'#45666b',accent:'#bdd4c4'},
+    {title:'橘色夏天',subtitle:'ORANGE SUMMER',background:'#a36348',accent:'#f4d198'},
+    {title:'晚风',subtitle:'EVENING BREEZE',background:'#566477',accent:'#d9c9a6'},
+    {title:'回声',subtitle:'ECHOES',background:'#6e5b72',accent:'#d5bdd4'},
+    {title:'月光列车',subtitle:'MOONLIGHT TRAIN',background:'#3e536b',accent:'#d9ddd2'},
+    {title:'森林来信',subtitle:'FOREST LETTER',background:'#52684b',accent:'#d9c994'},
+    {title:'旧时光',subtitle:'OLD TIMES',background:'#82665b',accent:'#e5c4a2'},
+    {title:'海边散步',subtitle:'SEASIDE WALK',background:'#4e7882',accent:'#e8d7b7'}
   ];
   const recordCovers=[],recordJackets=[],recordHitTargets=[];
   records.forEach((record,index)=>{
@@ -436,13 +444,13 @@ try {
       ctx.fillStyle='#fff8e9';ctx.font='bold 52px sans-serif';ctx.textAlign='left';ctx.fillText(record.title,32,h-98);
       ctx.font='24px sans-serif';ctx.fillText(record.subtitle,34,h-54);
     });
-    const x=index<7?-.571+index*.078:.103+(index-7)*.078;
+    const x=index<11?-.595+index*.052:.075+(index-11)*.052;
     const jacket=new THREE.Group();jacket.position.set(x,.65,.22);jacket.userData.recordIndex=index;recordGroup.add(jacket);
-    box(.079,.44,.42,0,0,0,record.background,jacket);
-    const coverFace=picture(.405,.415,.04,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
-    box(.075,.4,.008,0,0,.214,record.accent,jacket);
-    box(.044,.06,.009,0,-.15,.22,palette.paper,jacket);
-    const hit=mesh(new THREE.PlaneGeometry(.078,.45),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),recordGroup);
+    box(.053,.44,.42,0,0,0,record.background,jacket);
+    const coverFace=picture(.405,.415,.027,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
+    box(.049,.4,.008,0,0,.214,record.accent,jacket);
+    box(.029,.06,.009,0,-.15,.22,palette.paper,jacket);
+    const hit=mesh(new THREE.PlaneGeometry(.052,.45),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),recordGroup);
     hit.position.set(x,.65,.453);hit.userData.recordIndex=index;
     hit.castShadow=false;hit.receiveShadow=false;
     recordHitTargets.push(hit);
