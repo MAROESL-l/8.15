@@ -402,10 +402,12 @@ try {
   // Record cabinet with vertically stored sleeves and a working turntable.
   const recordGroup=new THREE.Group();recordGroup.position.set(2.63,0,1.53);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
   for(const x of [-.59,.59])for(const z of [-.3,.3])cylinder(.035,.025,.22,x,.18,z,palette.edge,recordGroup);
-  box(1.42,.75,.8,0,.65,0,palette.wood,recordGroup);
+  box(1.42,.07,.8,0,.33,0,palette.wood,recordGroup);
+  box(1.32,.055,.74,0,.4,0,palette.lightWood,recordGroup);
+  for(const x of [-.675,.675])box(.07,.7,.8,x,.68,0,palette.wood,recordGroup);
+  box(.06,.67,.76,0,.675,0,palette.lightWood,recordGroup);
+  for(const y of [.39,.99])box(1.32,.045,.045,0,y,-.36,palette.edge,recordGroup);
   box(1.5,.09,.87,0,1.06,0,palette.lightWood,recordGroup);
-  box(1.29,.5,.018,0,.65,.412,palette.edge,recordGroup);
-  box(.06,.54,.04,0,.65,.43,palette.lightWood,recordGroup);
   const records=[
     {title:'午夜频率',subtitle:'MIDNIGHT RADIO',background:'#263c49',accent:'#f0a267'},
     {title:'城市漫游',subtitle:'CITY WALK',background:'#936652',accent:'#f5dfb8'},
@@ -414,7 +416,13 @@ try {
     {title:'赤与青',subtitle:'RED & BLUE',background:'#364a65',accent:'#db765e'},
     {title:'日落之后',subtitle:'AFTER SUNSET',background:'#704f4c',accent:'#f1b77c'},
     {title:'微光',subtitle:'GLIMMER',background:'#536454',accent:'#d9ddaa'},
-    {title:'远方',subtitle:'FAR AWAY',background:'#546b82',accent:'#d6c3a2'}
+    {title:'远方',subtitle:'FAR AWAY',background:'#546b82',accent:'#d6c3a2'},
+    {title:'山间回声',subtitle:'MOUNTAIN ECHO',background:'#4f695d',accent:'#d7b977'},
+    {title:'蓝色时刻',subtitle:'BLUE HOUR',background:'#344c6b',accent:'#9fc5d9'},
+    {title:'风的来信',subtitle:'WIND LETTERS',background:'#8a765d',accent:'#f3dca6'},
+    {title:'静夜',subtitle:'QUIET NIGHT',background:'#3f455c',accent:'#c6b8d3'},
+    {title:'温度',subtitle:'WARMTH',background:'#895946',accent:'#efb98b'},
+    {title:'飞行日记',subtitle:'FLIGHT LOG',background:'#5b7882',accent:'#ddd5b7'}
   ];
   const recordCovers=[],recordJackets=[],recordHitTargets=[];
   records.forEach((record,index)=>{
@@ -428,13 +436,13 @@ try {
       ctx.fillStyle='#fff8e9';ctx.font='bold 52px sans-serif';ctx.textAlign='left';ctx.fillText(record.title,32,h-98);
       ctx.font='24px sans-serif';ctx.fillText(record.subtitle,34,h-54);
     });
-    const x=[-.52,-.4,-.28,-.16,.16,.28,.4,.52][index];
+    const x=index<7?-.555+index*.08:.075+(index-7)*.08;
     const jacket=new THREE.Group();jacket.position.set(x,.65,.22);jacket.userData.recordIndex=index;recordGroup.add(jacket);
-    box(.066,.44,.42,0,0,0,record.background,jacket);
-    const coverFace=picture(.405,.415,.034,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
-    box(.046,.4,.008,0,0,.214,record.accent,jacket);
-    box(.034,.06,.009,0,-.15,.22,palette.paper,jacket);
-    const hit=mesh(new THREE.PlaneGeometry(.105,.45),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),recordGroup);
+    box(.052,.44,.42,0,0,0,record.background,jacket);
+    const coverFace=picture(.405,.415,.027,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
+    box(.038,.4,.008,0,0,.214,record.accent,jacket);
+    box(.028,.06,.009,0,-.15,.22,palette.paper,jacket);
+    const hit=mesh(new THREE.PlaneGeometry(.078,.45),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),recordGroup);
     hit.position.set(x,.65,.453);hit.userData.recordIndex=index;
     hit.castShadow=false;hit.receiveShadow=false;
     recordHitTargets.push(hit);
