@@ -436,12 +436,12 @@ try {
       ctx.fillStyle='#fff8e9';ctx.font='bold 52px sans-serif';ctx.textAlign='left';ctx.fillText(record.title,32,h-98);
       ctx.font='24px sans-serif';ctx.fillText(record.subtitle,34,h-54);
     });
-    const x=index<7?-.555+index*.08:.075+(index-7)*.08;
+    const x=index<7?-.571+index*.078:.103+(index-7)*.078;
     const jacket=new THREE.Group();jacket.position.set(x,.65,.22);jacket.userData.recordIndex=index;recordGroup.add(jacket);
-    box(.052,.44,.42,0,0,0,record.background,jacket);
-    const coverFace=picture(.405,.415,.027,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
-    box(.038,.4,.008,0,0,.214,record.accent,jacket);
-    box(.028,.06,.009,0,-.15,.22,palette.paper,jacket);
+    box(.079,.44,.42,0,0,0,record.background,jacket);
+    const coverFace=picture(.405,.415,.04,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
+    box(.075,.4,.008,0,0,.214,record.accent,jacket);
+    box(.044,.06,.009,0,-.15,.22,palette.paper,jacket);
     const hit=mesh(new THREE.PlaneGeometry(.078,.45),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),recordGroup);
     hit.position.set(x,.65,.453);hit.userData.recordIndex=index;
     hit.castShadow=false;hit.receiveShadow=false;
