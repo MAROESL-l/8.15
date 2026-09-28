@@ -476,7 +476,8 @@ try {
   cylinder(.13,.16,.022,-.39,.548,1.91,material('#263c45',.3,.65),scene,48);
   cylinder(.018,.025,.065,-.39,.59,1.91,material('#8abcca',.28,.65));
   const globe=new THREE.Group();globe.position.set(-.39,.79,1.91);scene.add(globe);
-  // NASA Blue Marble Next Generation, September: global topography composite.
+  // Render the earth-widget palette on the room's sphere so the globe has real depth.
+  // Its bundled Miniature Earth runtime is absent, so use the existing local map as a land mask.
   const globeMap=new THREE.TextureLoader().load('images/earth-blue-marble.jpg',loaded=>{
     const canvas=document.createElement('canvas');
     canvas.width=loaded.image.width;canvas.height=loaded.image.height;
@@ -486,34 +487,29 @@ try {
     for(let i=0;i<pixels.data.length;i+=4){
       const red=pixels.data[i],green=pixels.data[i+1],blue=pixels.data[i+2];
       const ocean=Math.min(1,Math.max(0,(blue-Math.max(red,green)-2)/6));
-      if(!ocean)continue;
-      pixels.data[i]=red+(20+red*.5-red)*ocean;
-      pixels.data[i+1]=green+(67+green*.5-green)*ocean;
-      pixels.data[i+2]=blue+(108+blue*.6-blue)*ocean;
+      const land=56,oceanColor=255;
+      pixels.data[i]=land+(oceanColor-land)*ocean;
+      pixels.data[i+1]=land+(oceanColor-land)*ocean;
+      pixels.data[i+2]=land+(oceanColor-land)*ocean;
+      pixels.data[i+3]=255-61*ocean;
     }
     context.putImageData(pixels,0,0);
     loaded.image=canvas;loaded.needsUpdate=true;
   });
   globeMap.colorSpace=THREE.SRGBColorSpace;
-  const earth=mesh(new THREE.SphereGeometry(.17,48,32),new THREE.MeshBasicMaterial({map:globeMap,toneMapped:false}),globe);
+  const earth=mesh(new THREE.SphereGeometry(.17,64,48),new THREE.MeshBasicMaterial({map:globeMap,transparent:true,toneMapped:false}),globe);
   earth.castShadow=false;
-  const gridMaterial=new THREE.LineBasicMaterial({color:'#c8e1e9',transparent:true,opacity:.28,depthWrite:false,toneMapped:false});
-  const referenceMaterial=new THREE.LineBasicMaterial({color:'#e2f2f5',transparent:true,opacity:.42,depthWrite:false,toneMapped:false});
-  const gridRadius=.172;
-  // The map is equirectangular: its center is 0° longitude, with north at the top.
+  // earth-widget's location markers follow the same equirectangular coordinates.
+  const markerRadius=.177;
   function globePoint(longitude,latitude){
     const lon=THREE.MathUtils.degToRad(longitude),lat=THREE.MathUtils.degToRad(latitude);
-    return new THREE.Vector3(gridRadius*Math.cos(lat)*Math.cos(lon),gridRadius*Math.sin(lat),-gridRadius*Math.cos(lat)*Math.sin(lon));
+    return new THREE.Vector3(markerRadius*Math.cos(lat)*Math.cos(lon),markerRadius*Math.sin(lat),-markerRadius*Math.cos(lat)*Math.sin(lon));
   }
-  for(const latitude of [-60,-30,0,30,60]){
-    const points=[];
-    for(let step=0;step<120;step++)points.push(globePoint(-180+step*3,latitude));
-    globe.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(points),latitude===0?referenceMaterial:gridMaterial));
-  }
-  for(let longitude=-180;longitude<180;longitude+=30){
-    const points=[];
-    for(let latitude=-90;latitude<=90;latitude+=3)points.push(globePoint(longitude,latitude));
-    globe.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),longitude===0?referenceMaterial:gridMaterial));
+  const markerMaterial=new THREE.MeshBasicMaterial({color:'#cfa877',toneMapped:false});
+  for(const place of window.EARTH_LOCATIONS||[]){
+    const point=globePoint(Number(place.lng),Number(place.lat));
+    const marker=mesh(new THREE.SphereGeometry(.0035,8,6),markerMaterial,globe);
+    marker.position.copy(point);
   }
 
   let themeBlend=window.roomTheme.value==='dark'?1:0;
