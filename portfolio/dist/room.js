@@ -343,15 +343,19 @@ try {
   rounded(.63,.29,.04,.015,0,1.13,.447,palette.lightWood,deskDrawer);
   rounded(.24,.025,.025,.008,0,1.13,.475,palette.edge,deskDrawer);
   slidingDrawers.push({group:deskDrawer,travel:.35,open:false});
-  const laptop = new THREE.Group(); laptop.position.set(1.13,1.455,-1.59); scene.add(laptop);
-  const aluminum = material('#bfc5c3',.3,.65);
-  rounded(.85,.035,.51,.012,0,0,0,aluminum,laptop);
-  box(.79,.008,.28,0,.024,-.063,'#394040',laptop);
-  for(let row=0;row<5;row++)for(let key=0;key<13;key++)box(.054,.007,.039,-.354+key*.059,.032,-.18+row*.05,'#202727',laptop);
-  box(.28,.005,.028,0,.033,.059,'#242b2b',laptop);
-  rounded(.3,.006,.11,.002,0,.022,.16,'#929e9d',laptop);
-  const lid = new THREE.Group(); lid.position.set(0,.015,-.238); lid.rotation.x=-.16; laptop.add(lid);
-  rounded(.85,.56,.033,.012,0,.28,0,aluminum,lid);
+  // 14-inch MacBook Pro proportions: 31.26 cm wide by 22.12 cm deep, in Space Black.
+  const laptop = new THREE.Group(); laptop.position.set(1.13,1.446,-1.59); scene.add(laptop);
+  const spaceBlack=material('#22252a',.48,.46);
+  rounded(.85,.029,.601,.011,0,0,0,spaceBlack,laptop);
+  rounded(.72,.002,.275,.001,0,.016,-.105,'#272a2e',laptop);
+  for(let row=0;row<5;row++)for(let key=0;key<13;key++)box(.047,.004,.036,-.33+key*.055,.02,-.205+row*.051,'#101216',laptop);
+  box(.25,.003,.034,0,.02,.046,'#101216',laptop);
+  for(const x of [-.39,.39])box(.026,.002,.25,x,.016,-.105,'#17191d',laptop);
+  rounded(.34,.003,.17,.001,0,.016,.187,'#111317',laptop);
+  rounded(.335,.003,.165,.001,0,.018,.187,'#303339',laptop);
+  const lid = new THREE.Group(); lid.position.set(0,.0145,-.292); lid.rotation.x=-.22; laptop.add(lid);
+  rounded(.85,.56,.018,.007,0,.28,0,spaceBlack,lid);
+  rounded(.824,.53,.002,.0008,0,.28,.01,'#08090b',lid);
   const screenLoader=new THREE.TextureLoader();
   const screenMaps=['light','dark'].map(theme=>{
     const map=screenLoader.load(`images/room-home-${theme}.png`);
@@ -359,12 +363,14 @@ try {
     map.anisotropy=renderer.capabilities.getMaxAnisotropy();
     return map;
   });
-  const screen=picture(.81,.515,0,.285,.02,screenMaps[0],lid);
+  const screen=picture(.8,.5,0,.28,.013,screenMaps[0],lid);
   screen.material.emissive.set('#ffffff');screen.material.emissiveMap=screenMaps[0];screen.material.emissiveIntensity=.38;
+  rounded(.075,.022,.003,.001,0,.53,.016,'#060709',lid);
+  sphere(0,.527,.019,.0025,'#29323a',lid);
   // Small recognisable apple silhouette on the lid's reverse.
-  const apple = new THREE.Group(); apple.position.set(0,.29,-.022); lid.add(apple);
-  sphere(-.018,0,0,.034,'#e5e9e7',apple,[.85,1,.1]);sphere(.021,0,0,.034,'#e5e9e7',apple,[.85,1,.1]);
-  const leaf=sphere(.014,.051,0,.015,'#e5e9e7',apple,[.6,1,.12]);leaf.rotation.z=-.55;
+  const apple = new THREE.Group(); apple.position.set(0,.29,-.012); lid.add(apple);
+  sphere(-.018,0,0,.034,'#55585c',apple,[.85,1,.1]);sphere(.021,0,0,.034,'#55585c',apple,[.85,1,.1]);
+  const leaf=sphere(.014,.051,0,.015,'#55585c',apple,[.6,1,.12]);leaf.rotation.z=-.55;
   // Open cup with a visible inner wall; keep the water surface below its rim.
   const cupProfile=[
     [0,0],[.088,0],[.105,.2],[.086,.2],[.07,.02],[0,.02]
@@ -647,7 +653,7 @@ try {
   }
   function updateHomePreview(){
     if(!previewVisible)return;
-    laptop.localToWorld(previewAnchor.set(0,.32,-.22));
+    laptop.localToWorld(previewAnchor.set(0,.32,-.29));
     previewAnchor.project(camera);
     if(previewAnchor.z>1){setHomePreview(false);return;}
     const bounds=host.getBoundingClientRect();
