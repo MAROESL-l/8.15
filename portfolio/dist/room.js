@@ -430,9 +430,16 @@ try {
     {title:'月光列车',subtitle:'MOONLIGHT TRAIN',background:'#3e536b',accent:'#d9ddd2'},
     {title:'森林来信',subtitle:'FOREST LETTER',background:'#52684b',accent:'#d9c994'},
     {title:'旧时光',subtitle:'OLD TIMES',background:'#82665b',accent:'#e5c4a2'},
-    {title:'海边散步',subtitle:'SEASIDE WALK',background:'#4e7882',accent:'#e8d7b7'}
+    {title:'海边散步',subtitle:'SEASIDE WALK',background:'#4e7882',accent:'#e8d7b7'},
+    {title:'晨光',subtitle:'MORNING LIGHT',background:'#9a7858',accent:'#f3ddb1'},
+    {title:'岛屿',subtitle:'ISLANDS',background:'#507374',accent:'#d3e1cd'},
+    {title:'云的方向',subtitle:'CLOUD PATH',background:'#6c7185',accent:'#e2d8d0'},
+    {title:'夏日信号',subtitle:'SUMMER SIGNAL',background:'#9a5f52',accent:'#f0c6a2'},
+    {title:'夜航',subtitle:'NIGHT FLIGHT',background:'#344b60',accent:'#c7bfa6'},
+    {title:'漫长旅程',subtitle:'LONG JOURNEY',background:'#657459',accent:'#e2cf9c'}
   ];
   const recordCovers=[],recordJackets=[],recordHitTargets=[];
+  const recordsPerBay=14,recordSpacing=.041;
   records.forEach((record,index)=>{
     const cover=texture((ctx,w,h)=>{
       ctx.fillStyle=record.background;ctx.fillRect(0,0,w,h);
@@ -444,13 +451,15 @@ try {
       ctx.fillStyle='#fff8e9';ctx.font='bold 52px sans-serif';ctx.textAlign='left';ctx.fillText(record.title,32,h-98);
       ctx.font='24px sans-serif';ctx.fillText(record.subtitle,34,h-54);
     });
-    const x=index<11?-.595+index*.052:.075+(index-11)*.052;
+    const bay=index<recordsPerBay?0:1;
+    const slot=index%recordsPerBay;
+    const x=(bay? .335:-.335)+(slot-(recordsPerBay-1)/2)*recordSpacing;
     const jacket=new THREE.Group();jacket.position.set(x,.65,.22);jacket.userData.recordIndex=index;recordGroup.add(jacket);
-    box(.053,.44,.42,0,0,0,record.background,jacket);
-    const coverFace=picture(.405,.415,.027,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
-    box(.049,.4,.008,0,0,.214,record.accent,jacket);
-    box(.029,.06,.009,0,-.15,.22,palette.paper,jacket);
-    const hit=mesh(new THREE.PlaneGeometry(.052,.45),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),recordGroup);
+    box(.042,.44,.42,0,0,0,record.background,jacket);
+    const coverFace=picture(.405,.415,.0215,0,0,cover,jacket);coverFace.rotation.y=Math.PI/2;
+    box(.039,.4,.008,0,0,.214,record.accent,jacket);
+    box(.022,.06,.009,0,-.15,.22,palette.paper,jacket);
+    const hit=mesh(new THREE.PlaneGeometry(recordSpacing,.45),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),recordGroup);
     hit.position.set(x,.65,.453);hit.userData.recordIndex=index;
     hit.castShadow=false;hit.receiveShadow=false;
     recordHitTargets.push(hit);
