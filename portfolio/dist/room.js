@@ -516,18 +516,6 @@ try {
   globeMap.colorSpace=THREE.SRGBColorSpace;
   const earth=mesh(new THREE.SphereGeometry(.17,64,48),new THREE.MeshBasicMaterial({map:globeMap,transparent:true,toneMapped:false}),globe);
   earth.castShadow=false;
-  // earth-widget's location markers follow the same equirectangular coordinates.
-  const markerRadius=.177;
-  function globePoint(longitude,latitude){
-    const lon=THREE.MathUtils.degToRad(longitude),lat=THREE.MathUtils.degToRad(latitude);
-    return new THREE.Vector3(markerRadius*Math.cos(lat)*Math.cos(lon),markerRadius*Math.sin(lat),-markerRadius*Math.cos(lat)*Math.sin(lon));
-  }
-  const markerMaterial=new THREE.MeshBasicMaterial({color:'#cfa877',toneMapped:false});
-  for(const place of window.EARTH_LOCATIONS||[]){
-    const point=globePoint(Number(place.lng),Number(place.lat));
-    const marker=mesh(new THREE.SphereGeometry(.0035,8,6),markerMaterial,globe);
-    marker.position.copy(point);
-  }
 
   let themeBlend=window.roomTheme.value==='dark'?1:0;
   let themeTarget=themeBlend;
