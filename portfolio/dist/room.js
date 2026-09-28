@@ -207,13 +207,13 @@ try {
   box(.88, 1.13, .075, -2.2, 2.91, -2.8, palette.edge, backWall);
   picture(.77, 1.02, -2.2, 2.91, -2.756, art, backWall);
 
-  // Portrait photograph beside the bed.
+  // Landscape photograph beside the bed.
   const sideArt = new THREE.Group(); sideArt.position.set(-3.42,2.45,.35); sideArt.rotation.y=Math.PI/2;leftWall.add(sideArt);
-  const sideMap=new THREE.TextureLoader().load('images/bedside-photo.jpg');
+  const sideMap=new THREE.TextureLoader().load('images/bedside-photo.jpg?v=2');
   sideMap.colorSpace=THREE.SRGBColorSpace;
   sideMap.anisotropy=renderer.capabilities.getMaxAnisotropy();
-  box(.99,1.43,.07,0,0,0,palette.lightWood,sideArt);
-  picture(.875,1.312,0,0,.04,sideMap,sideArt);
+  box(1.68,1.28,.07,0,0,0,palette.lightWood,sideArt);
+  picture(1.56,1.17,0,0,.04,sideMap,sideArt);
 
   // Low bookshelf: open cubbies, varied books, a ceramic vase and a plant.
   const shelf = new THREE.Group(); shelf.position.set(-2.06, 0, -2.47); scene.add(shelf);
