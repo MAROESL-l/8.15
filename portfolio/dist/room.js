@@ -216,7 +216,7 @@ try {
   picture(1.56,1.17,0,0,.04,sideMap,sideArt);
 
   // Low bookshelf: open cubbies, varied books, a ceramic vase and a plant.
-  const shelf = new THREE.Group(); shelf.position.set(-2.3, 0, .7); scene.add(shelf);
+  const shelf = new THREE.Group(); shelf.position.set(-3.07, 0, 1.45); shelf.rotation.y=Math.PI/2; scene.add(shelf);
   box(2.08, 1.64, .065, 0, .92, -.25, '#805e41', shelf);
   for (const x of [-1.04, 0, 1.04]) box(.08, 1.66, .53, x, .92, 0, palette.wood, shelf);
   for (const y of [.12, .89, 1.76]) box(2.2, .1, .58, 0, y, 0, palette.lightWood, shelf);
@@ -740,7 +740,7 @@ try {
   // Floor-plan collision volumes for furniture.
   const obstacles = [
     [-3.42,-1.46,-2.84,.24], // bed
-    [-3.4,-1.2,.4,1.0], // bookshelf at the foot of the bed
+    [-3.36,-2.78,.35,2.55], // bookshelf against the left wall at the foot of the bed
     [-.14,2.64,-2.28,-1.08], // desk
     [.64,1.6,-1.08,.05], // chair
     [2.18,3.08,.77,2.29], // record cabinet
