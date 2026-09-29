@@ -376,11 +376,11 @@ try {
     [0,0],[.088,0],[.105,.2],[.086,.2],[.07,.02],[0,.02]
   ].map(([radius,height])=>new THREE.Vector2(radius,height));
   const cup=mesh(new THREE.LatheGeometry(cupProfile,32),'#e8e0c9');
-  cup.position.set(2.04,1.42,-1.47);
+  cup.position.set(2.27,1.42,-1.47);
   const water=mesh(new THREE.CircleGeometry(.077,32),material('#61462f',.25));
   water.rotation.x=-Math.PI/2;
-  water.position.set(2.04,1.585,-1.47);
-  const handle=mesh(new THREE.TorusGeometry(.073,.022,8,20),'#e8e0c9');handle.position.set(2.15,1.53,-1.47);
+  water.position.set(2.27,1.585,-1.47);
+  const handle=mesh(new THREE.TorusGeometry(.073,.022,8,20),'#e8e0c9');handle.position.set(2.38,1.53,-1.47);
   const notebook=new THREE.Group();scene.add(notebook);
   box(.35,.045,.44,.26,1.46,-1.52,palette.terracotta,notebook).rotation.y=-.12;
   box(.32,.019,.41,.26,1.49,-1.52,palette.paper,notebook).rotation.y=-.12;
@@ -390,17 +390,18 @@ try {
   notebookHit.castShadow=false;notebookHit.receiveShadow=false;
   // Angled task lamp.
   const deskLamp=new THREE.Group();scene.add(deskLamp);
-  cylinder(.15,.17,.045,2.3,1.47,-1.99,palette.green,deskLamp);
-  rod([2.3,1.49,-1.99],[2.3,2.08,-1.99],.025,palette.green,deskLamp);
-  rod([2.3,2.08,-1.99],[1.96,2.25,-1.89],.027,palette.green,deskLamp);
-  const deskShade=new THREE.Group();deskShade.position.set(1.93,2.21,-1.88);deskShade.rotation.z=-.25;deskLamp.add(deskShade);
+  const lampX=.45,lampZ=-2.03;
+  cylinder(.15,.17,.045,lampX,1.47,lampZ,palette.green,deskLamp);
+  rod([lampX,1.49,lampZ],[lampX,2.08,lampZ],.025,palette.green,deskLamp);
+  rod([lampX,2.08,lampZ],[lampX+.34,2.25,lampZ+.1],.027,palette.green,deskLamp);
+  const deskShade=new THREE.Group();deskShade.position.set(lampX+.37,2.21,lampZ+.11);deskShade.rotation.z=.25;deskLamp.add(deskShade);
   mesh(new THREE.CylinderGeometry(.095,.18,.18,32,1,true),new THREE.MeshStandardMaterial({color:palette.green,roughness:.8,side:THREE.DoubleSide}),deskShade);
   mesh(new THREE.CylinderGeometry(.086,.168,.171,32,1,true),new THREE.MeshStandardMaterial({color:'#e9dfbc',roughness:.7,side:THREE.DoubleSide}),deskShade);
   const shadeRim=mesh(new THREE.TorusGeometry(.174,.008,8,32),palette.green,deskShade);shadeRim.rotation.x=Math.PI/2;shadeRim.position.y=-.09;
   cylinder(.025,.025,.085,0,-.035,0,palette.metal,deskShade);
   const deskBulbMaterial=new THREE.MeshStandardMaterial({color:'#fff1ce',emissive:'#ffd68a',emissiveIntensity:1.1,roughness:.25});
   sphere(0,-.115,0,.06,deskBulbMaterial,deskShade,[.82,1,.82]);
-  const lampLight=new THREE.PointLight('#ffe0a1',.6,3);lampLight.position.set(1.905,2.1,-1.88);scene.add(lampLight);
+  const lampLight=new THREE.PointLight('#ffe0a1',.6,3);lampLight.position.set(lampX+.395,2.1,lampZ+.11);scene.add(lampLight);
 
   // Desk chair.
   const chair = new THREE.Group(); chair.position.set(1.12,0,-.46);scene.add(chair);
@@ -497,13 +498,11 @@ try {
   box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
   picture(.47,.51,-.42,1.42,-.321,sleeve,recordGroup);
   plant(2.9,.09,-1.1,1.05);
-  // Small ottoman with a slowly rotating Earth globe.
-  const globeZ=.15;
-  cylinder(.39,.35,.37,-.39,.28,globeZ,'#bf805e');
-  cylinder(.39,.39,.09,-.39,.49,globeZ,'#d29a73');
-  cylinder(.13,.16,.022,-.39,.548,globeZ,material('#263c45',.3,.65),scene,48);
-  cylinder(.018,.025,.065,-.39,.59,globeZ,material('#8abcca',.28,.65));
-  const globe=new THREE.Group();globe.position.set(-.39,.79,globeZ);scene.add(globe);
+  // Move the rotating globe onto the desk where the lamp used to stand.
+  const globeX=2.3,globeZ=-1.99,deskSurfaceY=1.43;
+  cylinder(.13,.16,.022,globeX,deskSurfaceY+.011,globeZ,material('#263c45',.3,.65),scene,48);
+  cylinder(.018,.025,.065,globeX,deskSurfaceY+.053,globeZ,material('#8abcca',.28,.65));
+  const globe=new THREE.Group();globe.position.set(globeX,deskSurfaceY+.253,globeZ);scene.add(globe);
   // Render the earth-widget palette on the room's sphere so the globe has real depth.
   // Its bundled Miniature Earth runtime is absent, so use the existing local map as a land mask.
   const globeMap=new THREE.TextureLoader().load('images/earth-blue-marble.jpg',loaded=>{
@@ -744,7 +743,6 @@ try {
     [.64,1.6,-1.08,.05], // chair
     [2.18,3.08,.77,2.29], // record cabinet
     [-1.15,-.49,-1.25,-.6], // bedside table
-    [-.79,.01,-.25,.55], // ottoman
     [2.67,3.13,-1.33,-.87] // plant
   ];
   const bodyRadius=.16;
