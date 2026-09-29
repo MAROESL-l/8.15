@@ -496,7 +496,7 @@ try {
   const sleeve=texture((ctx,w,h)=>{ctx.fillStyle='#d9ad74';ctx.fillRect(0,0,w,h);ctx.fillStyle='#354b40';ctx.beginPath();ctx.arc(w*.5,h*.51,w*.32,0,7);ctx.fill();ctx.fillStyle='#d9ad74';ctx.beginPath();ctx.arc(w*.5,h*.51,w*.1,0,7);ctx.fill();ctx.font='32px Georgia';ctx.textAlign='center';ctx.fillStyle='#354b40';ctx.font='17px Georgia';});
   box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
   picture(.47,.51,-.42,1.42,-.321,sleeve,recordGroup);
-  plant(2.9,.09,-2.03,1.4);
+  plant(2.9,.09,-1.1,1.05);
   // Small ottoman with a slowly rotating Earth globe.
   const globeZ=.15;
   cylinder(.39,.35,.37,-.39,.28,globeZ,'#bf805e');
@@ -745,7 +745,7 @@ try {
     [2.18,3.08,.77,2.29], // record cabinet
     [-1.15,-.49,-1.25,-.6], // bedside table
     [-.79,.01,-.25,.55], // ottoman
-    [2.61,3.19,-2.32,-1.74] // plant
+    [2.67,3.13,-1.33,-.87] // plant
   ];
   const bodyRadius=.16;
   function walkable(x,z){
