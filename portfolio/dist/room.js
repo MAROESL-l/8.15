@@ -503,9 +503,9 @@ try {
   box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
   picture(.47,.51,-.42,1.42,-.321,sleeve,recordGroup);
   plant(2.9,.09,-1.1,1.05);
-  // The globe rests directly on the desk without a stand.
-  const globeX=2.3,globeZ=-1.99,globeRadius=.17,deskSurfaceY=1.43;
-  const globe=new THREE.Group();globe.position.set(globeX,deskSurfaceY+globeRadius+.012,globeZ);scene.add(globe);
+  // The globe hovers slightly above the desk without a stand.
+  const globeX=2.3,globeZ=-1.99,globeRadius=.17,deskSurfaceY=1.43,globeHover=.07;
+  const globe=new THREE.Group();globe.position.set(globeX,deskSurfaceY+globeRadius+globeHover,globeZ);scene.add(globe);
   // Render the earth-widget palette on the room's sphere so the globe has real depth.
   // Its bundled Miniature Earth runtime is absent, so use the existing local map as a land mask.
   const globeMap=new THREE.TextureLoader().load('images/earth-blue-marble.jpg',loaded=>{
