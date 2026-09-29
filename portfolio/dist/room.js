@@ -498,11 +498,12 @@ try {
   picture(.47,.51,-.42,1.42,-.321,sleeve,recordGroup);
   plant(2.9,.09,-2.03,1.4);
   // Small ottoman with a slowly rotating Earth globe.
-  cylinder(.39,.35,.37,-.39,.28,1.91,'#bf805e');
-  cylinder(.39,.39,.09,-.39,.49,1.91,'#d29a73');
-  cylinder(.13,.16,.022,-.39,.548,1.91,material('#263c45',.3,.65),scene,48);
-  cylinder(.018,.025,.065,-.39,.59,1.91,material('#8abcca',.28,.65));
-  const globe=new THREE.Group();globe.position.set(-.39,.79,1.91);scene.add(globe);
+  const globeZ=.15;
+  cylinder(.39,.35,.37,-.39,.28,globeZ,'#bf805e');
+  cylinder(.39,.39,.09,-.39,.49,globeZ,'#d29a73');
+  cylinder(.13,.16,.022,-.39,.548,globeZ,material('#263c45',.3,.65),scene,48);
+  cylinder(.018,.025,.065,-.39,.59,globeZ,material('#8abcca',.28,.65));
+  const globe=new THREE.Group();globe.position.set(-.39,.79,globeZ);scene.add(globe);
   // Render the earth-widget palette on the room's sphere so the globe has real depth.
   // Its bundled Miniature Earth runtime is absent, so use the existing local map as a land mask.
   const globeMap=new THREE.TextureLoader().load('images/earth-blue-marble.jpg',loaded=>{
@@ -743,7 +744,7 @@ try {
     [.64,1.6,-1.08,.05], // chair
     [2.18,3.08,.77,2.29], // record cabinet
     [-1.15,-.49,-1.25,-.6], // bedside table
-    [-.79,.01,1.51,2.31], // ottoman
+    [-.79,.01,-.25,.55], // ottoman
     [2.61,3.19,-2.32,-1.74] // plant
   ];
   const bodyRadius=.16;
