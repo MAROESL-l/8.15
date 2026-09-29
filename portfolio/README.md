@@ -13,7 +13,7 @@ python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
 - `dist/index.html`：个人内容、真实作品图片和链接。
 - `dist/styles.css`：响应式布局、扑克牌翻转与减少动态效果适配。
 - `dist/script.js`：作品简介、点击翻转、鼠标倾斜。
-- `dist/images/`：来自本人旧站 https://maroesl.github.io/ 的项目截图。
+
 
 精选作品：柒品家具、拼图、茄子音乐、猫眼电影。简介根据项目类型整理；经历只描述已有作品体现的开发实践，没有添加工作单位、职称或年限。
 
