@@ -431,7 +431,7 @@ try {
   for(const y of [.39,.99])box(1.32,.045,.045,0,y,-.36,palette.edge,recordGroup);
   box(1.5,.09,.87,0,1.06,0,palette.lightWood,recordGroup);
   const records=[
-    {title:'赤与青',subtitle:'RED & BLUE',background:'#364a65',accent:'#db765e',audio:'audio/赤与青.m4a'},
+    {title:'赤与青',subtitle:'RED & BLUE',background:'#e3211c',accent:'#078cba',audio:'audio/赤与青.m4a'},
     {title:'午夜频率',subtitle:'MIDNIGHT RADIO',background:'#263c49',accent:'#f0a267'},
     {title:'城市漫游',subtitle:'CITY WALK',background:'#936652',accent:'#f5dfb8'},
     {title:'海岸线',subtitle:'COASTLINE',background:'#527a78',accent:'#eac985'},
@@ -463,7 +463,7 @@ try {
   const recordCovers=[],recordCoverMaps=[],recordJackets=[],recordHitTargets=[];
   const recordsPerBay=14,recordSpacing=.041;
   records.forEach((record,index)=>{
-    const cover=texture((ctx,w,h)=>{
+    const cover=index===0?new THREE.TextureLoader().load('images/red-and-blue-cover.webp'):texture((ctx,w,h)=>{
       ctx.fillStyle=record.background;ctx.fillRect(0,0,w,h);
       ctx.fillStyle=record.accent;
       if(index%4===0){ctx.beginPath();ctx.arc(w*.52,h*.43,w*.27,0,Math.PI*2);ctx.fill();ctx.fillStyle=record.background;ctx.beginPath();ctx.arc(w*.52,h*.43,w*.16,0,Math.PI*2);ctx.fill();}
@@ -473,6 +473,7 @@ try {
       ctx.fillStyle='#fff8e9';ctx.font='bold 52px sans-serif';ctx.textAlign='left';ctx.fillText(record.title,32,h-98);
       ctx.font='24px sans-serif';ctx.fillText(record.subtitle,34,h-54);
     });
+    if(index===0){cover.colorSpace=THREE.SRGBColorSpace;cover.anisotropy=renderer.capabilities.getMaxAnisotropy();}
     const bay=index<recordsPerBay?0:1;
     const slot=index%recordsPerBay;
     const x=(bay? .335:-.335)+(slot-(recordsPerBay-1)/2)*recordSpacing;
@@ -487,7 +488,7 @@ try {
     recordHitTargets.push(hit);
     recordJackets.push(jacket);
     recordCoverMaps.push(cover);
-    recordCovers.push(cover.image.toDataURL('image/png'));
+    recordCovers.push(index===0?'images/red-and-blue-cover.webp':cover.image.toDataURL('image/png'));
   });
   const recordPlayer=new THREE.Group();recordGroup.add(recordPlayer);
   rounded(.97,.09,.66,.025,-.12,1.15,0,palette.dark,recordPlayer);
