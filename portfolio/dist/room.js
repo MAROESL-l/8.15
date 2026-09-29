@@ -356,8 +356,8 @@ try {
   }
   box(.25,.006,.029,0,.022,.046,'#20252a',laptop);
   for(const x of [-.39,.39])box(.026,.002,.25,x,.016,-.105,'#17191d',laptop);
-  rounded(.34,.003,.17,.001,0,.016,.187,'#111317',laptop);
-  rounded(.335,.003,.165,.001,0,.018,.187,'#303339',laptop);
+  rounded(.28,.003,.17,.001,0,.016,.187,'#111317',laptop);
+  rounded(.275,.003,.165,.001,0,.018,.187,'#303339',laptop);
   const lid = new THREE.Group(); lid.position.set(0,.0145,-.292); lid.rotation.x=-.22; laptop.add(lid);
   rounded(.85,.56,.018,.007,0,.28,0,spaceBlack,lid);
   rounded(.824,.53,.002,.0008,0,.28,.01,'#08090b',lid);
