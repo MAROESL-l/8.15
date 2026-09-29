@@ -214,7 +214,7 @@ try {
 
   // Landscape photograph beside the bed.
   const sideArt = new THREE.Group(); sideArt.position.set(-3.42,2.45,-1.3); sideArt.rotation.y=Math.PI/2;leftWall.add(sideArt);
-  const sideMap=new THREE.TextureLoader().load('images/bedside-photo.jpg?v=2');
+  const sideMap=new THREE.TextureLoader().load('images/bedside-photo.webp');
   sideMap.colorSpace=THREE.SRGBColorSpace;
   sideMap.anisotropy=renderer.capabilities.getMaxAnisotropy();
   box(1.68,1.28,.07,0,0,0,palette.lightWood,sideArt);
