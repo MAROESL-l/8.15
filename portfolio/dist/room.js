@@ -498,11 +498,9 @@ try {
   box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
   picture(.47,.51,-.42,1.42,-.321,sleeve,recordGroup);
   plant(2.9,.09,-1.1,1.05);
-  // Move the rotating globe onto the desk where the lamp used to stand.
-  const globeX=2.3,globeZ=-1.99,deskSurfaceY=1.43;
-  cylinder(.13,.16,.022,globeX,deskSurfaceY+.011,globeZ,material('#263c45',.3,.65),scene,48);
-  cylinder(.018,.025,.065,globeX,deskSurfaceY+.053,globeZ,material('#8abcca',.28,.65));
-  const globe=new THREE.Group();globe.position.set(globeX,deskSurfaceY+.253,globeZ);scene.add(globe);
+  // The globe rests directly on the desk without a stand.
+  const globeX=2.3,globeZ=-1.99,globeRadius=.17,deskSurfaceY=1.43;
+  const globe=new THREE.Group();globe.position.set(globeX,deskSurfaceY+globeRadius,globeZ);scene.add(globe);
   // Render the earth-widget palette on the room's sphere so the globe has real depth.
   // Its bundled Miniature Earth runtime is absent, so use the existing local map as a land mask.
   const globeMap=new THREE.TextureLoader().load('images/earth-blue-marble.jpg',loaded=>{
@@ -524,8 +522,7 @@ try {
     loaded.image=canvas;loaded.needsUpdate=true;
   });
   globeMap.colorSpace=THREE.SRGBColorSpace;
-  const earth=mesh(new THREE.SphereGeometry(.17,64,48),new THREE.MeshBasicMaterial({map:globeMap,transparent:true,toneMapped:false}),globe);
-  earth.castShadow=false;
+  mesh(new THREE.SphereGeometry(globeRadius,64,48),new THREE.MeshBasicMaterial({map:globeMap,transparent:true,toneMapped:false}),globe);
 
   let themeBlend=window.roomTheme.value==='dark'?1:0;
   let themeTarget=themeBlend;
