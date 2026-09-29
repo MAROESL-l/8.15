@@ -347,9 +347,14 @@ try {
   const laptop = new THREE.Group(); laptop.position.set(1.13,1.446,-1.59); scene.add(laptop);
   const spaceBlack=material('#22252a',.48,.46);
   rounded(.85,.029,.601,.011,0,0,0,spaceBlack,laptop);
-  rounded(.72,.002,.275,.001,0,.016,-.105,'#272a2e',laptop);
-  for(let row=0;row<5;row++)for(let key=0;key<13;key++)box(.047,.004,.036,-.33+key*.055,.02,-.205+row*.051,'#101216',laptop);
-  box(.25,.003,.034,0,.02,.046,'#101216',laptop);
+  // A contrasting keyboard well keeps the individual dark keycaps readable.
+  rounded(.72,.003,.275,.001,0,.016,-.105,'#858c91',laptop);
+  for(let row=0;row<5;row++)for(let key=0;key<13;key++){
+    const x=-.33+key*.055,z=-.205+row*.051;
+    box(.041,.006,.029,x,.022,z,'#20252a',laptop);
+    box(.013,.001,.005,x-.008,.026,z-.007,'#c6cbc9',laptop);
+  }
+  box(.25,.006,.029,0,.022,.046,'#20252a',laptop);
   for(const x of [-.39,.39])box(.026,.002,.25,x,.016,-.105,'#17191d',laptop);
   rounded(.34,.003,.17,.001,0,.016,.187,'#111317',laptop);
   rounded(.335,.003,.165,.001,0,.018,.187,'#303339',laptop);
