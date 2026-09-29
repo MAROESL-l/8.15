@@ -127,12 +127,17 @@ try {
   box(.15,3.65,5.96,3.52,1.85,0,palette.wall);
   box(7.12,3.65,.15,0,1.85,2.94,palette.wallSide);
   box(7.2,.16,6.04,0,3.76,0,'#e8dfcb');
-  box(.06,.12,5.9,3.4,.13,0,'#e0d3b7');
+  // Stop the right-wall baseboard at the door casing instead of running through its bottom.
+  const doorZ=-.15,doorTrimHalfWidth=.655,baseboardEnd=2.95;
+  const baseboardLeftEnd=doorZ-doorTrimHalfWidth-.015;
+  const baseboardRightStart=doorZ+doorTrimHalfWidth+.015;
+  box(.06,.12,baseboardLeftEnd+baseboardEnd,3.4,.13,(baseboardLeftEnd-baseboardEnd)/2,'#e0d3b7');
+  box(.06,.12,baseboardEnd-baseboardRightStart,3.4,.13,(baseboardRightStart+baseboardEnd)/2,'#e0d3b7');
   box(7,.12,.06,0,.13,2.82,'#c9ceb9');
   for(const x of [-3.4,3.4])box(.1,.13,5.8,x,3.6,0,'#eee4cf');
   for(const z of [-2.82,2.82])box(6.8,.13,.1,0,3.6,z,'#eee4cf');
   // Closed panel door on the right wall, with frame, threshold and brass handle.
-  const door = new THREE.Group();door.position.set(3.42,0,-.15);door.rotation.y=-Math.PI/2;scene.add(door);
+  const door = new THREE.Group();door.position.set(3.42,0,doorZ);door.rotation.y=-Math.PI/2;scene.add(door);
   box(1.24,2.62,.07,0,1.36,0,palette.edge,door);
   box(1.08,2.48,.06,0,1.32,.045,'#ad8059',door);
   for(const x of [-.61,.61])box(.09,2.69,.12,x,1.39,.06,'#dcc7a4',door);
