@@ -455,7 +455,7 @@ try {
     {title:'夜航',subtitle:'NIGHT FLIGHT',background:'#344b60',accent:'#c7bfa6'},
     {title:'漫长旅程',subtitle:'LONG JOURNEY',background:'#657459',accent:'#e2cf9c'}
   ];
-  const recordCovers=[],recordJackets=[],recordHitTargets=[];
+  const recordCovers=[],recordCoverMaps=[],recordJackets=[],recordHitTargets=[];
   const recordsPerBay=14,recordSpacing=.041;
   records.forEach((record,index)=>{
     const cover=texture((ctx,w,h)=>{
@@ -481,6 +481,7 @@ try {
     hit.castShadow=false;hit.receiveShadow=false;
     recordHitTargets.push(hit);
     recordJackets.push(jacket);
+    recordCoverMaps.push(cover);
     recordCovers.push(cover.image.toDataURL('image/png'));
   });
   const recordPlayer=new THREE.Group();recordGroup.add(recordPlayer);
@@ -500,9 +501,19 @@ try {
   cylinder(.019,.019,.012,-.52,1.211,.24,'#d3bc84',recordPlayer);
   const powerLight=material('#544c3b',.45);
   cylinder(.019,.019,.012,.26,1.211,.24,powerLight,recordPlayer);
-  const sleeve=texture((ctx,w,h)=>{ctx.fillStyle='#d9ad74';ctx.fillRect(0,0,w,h);ctx.fillStyle='#354b40';ctx.beginPath();ctx.arc(w*.5,h*.51,w*.32,0,7);ctx.fill();ctx.fillStyle='#d9ad74';ctx.beginPath();ctx.arc(w*.5,h*.51,w*.1,0,7);ctx.fill();ctx.font='32px Georgia';ctx.textAlign='center';ctx.fillStyle='#354b40';ctx.font='17px Georgia';});
+  const titleTexture=texture(()=>{},512,128);
+  function showRecordTitle(index){
+    const ctx=titleTexture.image.getContext('2d');
+    ctx.fillStyle='#1d302a';ctx.fillRect(0,0,512,128);
+    ctx.fillStyle='#f5e9cb';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=`bold ${records[index].title.length>5?48:68}px sans-serif`;
+    ctx.fillText(records[index].title,256,65,470);
+    titleTexture.needsUpdate=true;
+  }
+  picture(.31,.077,.14,1.149,.337,titleTexture,recordPlayer);
+  showRecordTitle(0);
   box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
-  picture(.47,.51,-.42,1.42,-.321,sleeve,recordGroup);
+  const displayedSleeve=picture(.47,.51,-.42,1.42,-.321,recordCoverMaps[0],recordGroup);
   plant(2.9,.09,-1.1,1.05);
   // The globe hovers slightly above the desk without a stand.
   const globeX=2.3,globeZ=-1.99,globeRadius=.17,deskSurfaceY=1.43,globeHover=.07;
@@ -566,6 +577,7 @@ try {
   const recordAudio=document.querySelector('#record-audio');
   const recordStatus=document.querySelector('#record-status');
   let recordPlaying=false;
+  let selectedRecordIndex=0;
   function updateRecordState(message){
     recordPlaying=!recordAudio.paused&&!recordAudio.ended&&recordAudio.readyState>=HTMLMediaElement.HAVE_FUTURE_DATA;
     powerLight.color.set(recordPlaying?'#f4a663':'#544c3b');
@@ -582,11 +594,16 @@ try {
   }
   function toggleRecord(){
     if(!recordAudio.paused){recordAudio.pause();return;}
+    if(!records[selectedRecordIndex].audio){updateRecordState(`已选择：${records[selectedRecordIndex].title}（暂无音源）`);return;}
     startRecord();
   }
   function playRecord(index){
+    selectedRecordIndex=index;
+    displayedSleeve.material.map=recordCoverMaps[index];
+    displayedSleeve.material.needsUpdate=true;
+    showRecordTitle(index);
     const audio=records[index].audio;
-    if(!audio)return;
+    if(!audio){recordAudio.pause();updateRecordState(`已选择：${records[index].title}（暂无音源）`);return;}
     if(recordAudio.getAttribute('src')!==audio)recordAudio.src=audio;
     recordAudio.currentTime=0;
     startRecord();
