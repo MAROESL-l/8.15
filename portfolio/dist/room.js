@@ -426,11 +426,11 @@ try {
   for(const y of [.39,.99])box(1.32,.045,.045,0,y,-.36,palette.edge,recordGroup);
   box(1.5,.09,.87,0,1.06,0,palette.lightWood,recordGroup);
   const records=[
+    {title:'赤与青',subtitle:'RED & BLUE',background:'#364a65',accent:'#db765e',audio:'audio/赤与青.m4a'},
     {title:'午夜频率',subtitle:'MIDNIGHT RADIO',background:'#263c49',accent:'#f0a267'},
     {title:'城市漫游',subtitle:'CITY WALK',background:'#936652',accent:'#f5dfb8'},
     {title:'海岸线',subtitle:'COASTLINE',background:'#527a78',accent:'#eac985'},
     {title:'慢慢来',subtitle:'SLOW DAYS',background:'#756b89',accent:'#f3c5a5'},
-    {title:'赤与青',subtitle:'RED & BLUE',background:'#364a65',accent:'#db765e',audio:'audio/赤与青.m4a'},
     {title:'日落之后',subtitle:'AFTER SUNSET',background:'#704f4c',accent:'#f1b77c'},
     {title:'微光',subtitle:'GLIMMER',background:'#536454',accent:'#d9ddaa'},
     {title:'远方',subtitle:'FAR AWAY',background:'#546b82',accent:'#d6c3a2'},
