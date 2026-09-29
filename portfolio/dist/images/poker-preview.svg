@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" role="img" aria-labelledby="title description">
+  <title id="title">Maroesl 扑克牌正反面预览</title>
+  <desc id="description">一张米白色的黑桃 A 正面扑克牌和一张红色 M 字样的背面扑克牌。</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#232923"/>
+      <stop offset="1" stop-color="#131914"/>
+    </linearGradient>
+    <linearGradient id="front" x2="1" y2="1">
+      <stop stop-color="#fffef5"/>
+      <stop offset="1" stop-color="#dedfd3"/>
+    </linearGradient>
+    <pattern id="back" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="12" height="12" fill="#933530"/>
+      <rect width="3" height="12" fill="#b9413c"/>
+    </pattern>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%">
+      <feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#080d09" flood-opacity=".48"/>
+    </filter>
+  </defs>
+  <rect width="760" height="420" rx="24" fill="url(#background)"/>
+  <circle cx="378" cy="192" r="176" fill="#7b9071" opacity=".08"/>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#cbd2c7">
+    <text x="34" y="45" font-size="12" letter-spacing="3">THE MANY SIDES OF ME</text>
+    <text x="726" y="45" font-size="12" letter-spacing="2" text-anchor="end">MAROESL / CARDS</text>
+  </g>
+  <g filter="url(#shadow)" transform="translate(156 63) rotate(-9 110 155)">
+    <rect x="0" y="0" width="220" height="310" rx="15" fill="url(#front)" stroke="#fffef7" stroke-width="2"/>
+    <rect x="8" y="8" width="204" height="294" rx="9" fill="none" stroke="#ffffff" stroke-opacity=".45"/>
+    <g fill="#202a25" font-family="Georgia, 'Times New Roman', serif">
+      <text x="18" y="38" font-size="34">A</text>
+      <text x="20" y="65" font-size="27">♠</text>
+      <text x="110" y="194" font-size="151" text-anchor="middle">♠</text>
+      <text x="110" y="258" font-size="11" letter-spacing="4" text-anchor="middle">MAROESL</text>
+      <g transform="translate(220 310) rotate(180)">
+        <text x="18" y="38" font-size="34">A</text>
+        <text x="20" y="65" font-size="27">♠</text>
+      </g>
+    </g>
+  </g>
+  <g filter="url(#shadow)" transform="translate(386 63) rotate(9 110 155)">
+    <rect x="0" y="0" width="220" height="310" rx="15" fill="url(#back)" stroke="#edece2" stroke-width="8"/>
+    <rect x="15" y="15" width="190" height="280" rx="5" fill="#9c3735" fill-opacity=".8" stroke="#f3d9b7"/>
+    <g fill="#f5eedb" font-family="Georgia, 'Times New Roman', serif" text-anchor="middle">
+      <text x="110" y="57" font-size="11" letter-spacing="3">THE MANY SIDES</text>
+      <path d="M43 90H177M43 220H177" stroke="#d6aa90" stroke-width="1"/>
+      <text x="110" y="199" font-size="105" font-style="italic">M</text>
+      <text x="110" y="268" font-size="11" letter-spacing="3">OF MAROESL</text>
+    </g>
+  </g>
+</svg>
