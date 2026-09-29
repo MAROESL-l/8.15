@@ -431,8 +431,8 @@ try {
   for(const y of [.39,.99])box(1.32,.045,.045,0,y,-.36,palette.edge,recordGroup);
   box(1.5,.09,.87,0,1.06,0,palette.lightWood,recordGroup);
   const records=[
-    {title:'赤与青',subtitle:'RED & BLUE',background:'#e3211c',accent:'#078cba',audio:'audio/赤与青.m4a'},
-    {title:'午夜频率',subtitle:'MIDNIGHT RADIO',background:'#263c49',accent:'#f0a267'},
+    {title:'赤与青',subtitle:'RED & BLUE',background:'#e3211c',accent:'#078cba',cover:'images/red-and-blue-cover.webp',audio:'audio/赤与青.m4a'},
+    {title:'鱼仔',subtitle:'卢广仲 · HE-R',background:'#ece7d6',accent:'#292525',cover:'images/fish-cover.webp',audio:'audio/鱼仔.m4a'},
     {title:'城市漫游',subtitle:'CITY WALK',background:'#936652',accent:'#f5dfb8'},
     {title:'海岸线',subtitle:'COASTLINE',background:'#527a78',accent:'#eac985'},
     {title:'慢慢来',subtitle:'SLOW DAYS',background:'#756b89',accent:'#f3c5a5'},
@@ -463,7 +463,7 @@ try {
   const recordCovers=[],recordCoverMaps=[],recordJackets=[],recordHitTargets=[];
   const recordsPerBay=14,recordSpacing=.041;
   records.forEach((record,index)=>{
-    const cover=index===0?new THREE.TextureLoader().load('images/red-and-blue-cover.webp'):texture((ctx,w,h)=>{
+    const cover=record.cover?new THREE.TextureLoader().load(record.cover):texture((ctx,w,h)=>{
       ctx.fillStyle=record.background;ctx.fillRect(0,0,w,h);
       ctx.fillStyle=record.accent;
       if(index%4===0){ctx.beginPath();ctx.arc(w*.52,h*.43,w*.27,0,Math.PI*2);ctx.fill();ctx.fillStyle=record.background;ctx.beginPath();ctx.arc(w*.52,h*.43,w*.16,0,Math.PI*2);ctx.fill();}
@@ -473,7 +473,7 @@ try {
       ctx.fillStyle='#fff8e9';ctx.font='bold 52px sans-serif';ctx.textAlign='left';ctx.fillText(record.title,32,h-98);
       ctx.font='24px sans-serif';ctx.fillText(record.subtitle,34,h-54);
     });
-    if(index===0){cover.colorSpace=THREE.SRGBColorSpace;cover.anisotropy=renderer.capabilities.getMaxAnisotropy();}
+    if(record.cover){cover.colorSpace=THREE.SRGBColorSpace;cover.anisotropy=renderer.capabilities.getMaxAnisotropy();}
     const bay=index<recordsPerBay?0:1;
     const slot=index%recordsPerBay;
     const x=(bay? .335:-.335)+(slot-(recordsPerBay-1)/2)*recordSpacing;
@@ -488,7 +488,7 @@ try {
     recordHitTargets.push(hit);
     recordJackets.push(jacket);
     recordCoverMaps.push(cover);
-    recordCovers.push(index===0?'images/red-and-blue-cover.webp':cover.image.toDataURL('image/png'));
+    recordCovers.push(record.cover||cover.image.toDataURL('image/png'));
   });
   const recordPlayer=new THREE.Group();recordGroup.add(recordPlayer);
   rounded(.97,.09,.66,.025,-.12,1.15,0,palette.dark,recordPlayer);
@@ -588,7 +588,7 @@ try {
     recordPlaying=!recordAudio.paused&&!recordAudio.ended&&recordAudio.readyState>=HTMLMediaElement.HAVE_FUTURE_DATA;
     powerLight.color.set(recordPlaying?'#f4a663':'#544c3b');
     powerLight.emissive.set(recordPlaying?'#b74722':'#000000');
-    recordStatus.textContent=message||(recordPlaying?'正在播放：赤与青':'唱片机已暂停');
+    recordStatus.textContent=message||(recordPlaying?`正在播放：${records[selectedRecordIndex].title}`:'唱片机已暂停');
   }
   async function startRecord(){
     try{await recordAudio.play();}
@@ -614,7 +614,7 @@ try {
     recordAudio.currentTime=0;
     startRecord();
   }
-  recordAudio.addEventListener('play',()=>updateRecordState('正在加载：赤与青'));
+  recordAudio.addEventListener('play',()=>updateRecordState(`正在加载：${records[selectedRecordIndex].title}`));
   recordAudio.addEventListener('playing',()=>updateRecordState());
   recordAudio.addEventListener('waiting',()=>updateRecordState('音频缓冲中'));
   recordAudio.addEventListener('pause',()=>updateRecordState());
