@@ -417,7 +417,7 @@ try {
   rod([-.29,.69,.23],[-.29,1.21,.36],.025,palette.metal,chair);rod([.29,.69,.23],[.29,1.21,.36],.025,palette.metal,chair);
   rounded(.79,.56,.14,.06,0,1.11,.34,'#b97051',chair).rotation.x=-.1;
   // Record cabinet with vertically stored sleeves and a working turntable.
-  const recordGroup=new THREE.Group();recordGroup.position.set(2.63,0,1.53);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
+  const recordGroup=new THREE.Group();recordGroup.position.set(2.93,0,1.53);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
   for(const x of [-.59,.59])for(const z of [-.3,.3])cylinder(.035,.025,.22,x,.18,z,palette.edge,recordGroup);
   box(1.42,.07,.8,0,.33,0,palette.wood,recordGroup);
   box(1.32,.055,.74,0,.4,0,palette.lightWood,recordGroup);
@@ -430,7 +430,7 @@ try {
     {title:'城市漫游',subtitle:'CITY WALK',background:'#936652',accent:'#f5dfb8'},
     {title:'海岸线',subtitle:'COASTLINE',background:'#527a78',accent:'#eac985'},
     {title:'慢慢来',subtitle:'SLOW DAYS',background:'#756b89',accent:'#f3c5a5'},
-    {title:'赤与青',subtitle:'RED & BLUE',background:'#364a65',accent:'#db765e'},
+    {title:'赤与青',subtitle:'RED & BLUE',background:'#364a65',accent:'#db765e',audio:'audio/赤与青.m4a'},
     {title:'日落之后',subtitle:'AFTER SUNSET',background:'#704f4c',accent:'#f1b77c'},
     {title:'微光',subtitle:'GLIMMER',background:'#536454',accent:'#d9ddaa'},
     {title:'远方',subtitle:'FAR AWAY',background:'#546b82',accent:'#d6c3a2'},
@@ -572,14 +572,24 @@ try {
     powerLight.emissive.set(recordPlaying?'#b74722':'#000000');
     recordStatus.textContent=message||(recordPlaying?'正在播放：赤与青':'唱片机已暂停');
   }
-  async function toggleRecord(){
-    if(!recordAudio.paused){recordAudio.pause();return;}
+  async function startRecord(){
     try{await recordAudio.play();}
     catch(error){
       if(error.name==='AbortError')return;
       updateRecordState('音频无法播放，请检查文件或浏览器设置');
       console.error('Record playback failed:',error);
     }
+  }
+  function toggleRecord(){
+    if(!recordAudio.paused){recordAudio.pause();return;}
+    startRecord();
+  }
+  function playRecord(index){
+    const audio=records[index].audio;
+    if(!audio)return;
+    if(recordAudio.getAttribute('src')!==audio)recordAudio.src=audio;
+    recordAudio.currentTime=0;
+    startRecord();
   }
   recordAudio.addEventListener('play',()=>updateRecordState('正在加载：赤与青'));
   recordAudio.addEventListener('playing',()=>updateRecordState());
@@ -631,7 +641,7 @@ try {
         recordPreviewImage.src=recordCovers[index];
         recordPreviewImage.alt=`${records[index].title}唱片封面`;
         recordPreview.querySelector('strong').textContent=records[index].title;
-        recordPreview.querySelector('small').textContent=records[index].subtitle;
+        recordPreview.querySelector('small').textContent=`${records[index].subtitle} · ${records[index].audio?'点击播放':'暂无音源'}`;
       }
       recordPreview.style.setProperty('--record-preview-x',`${Math.max(12,Math.min(event.clientX+22,innerWidth-202))}px`);
       recordPreview.style.setProperty('--record-preview-y',`${Math.max(12,Math.min(event.clientY+18,innerHeight-258))}px`);
@@ -733,7 +743,11 @@ try {
     if(activate&&action==='bedside-drawer')slidingDrawers[0].open=!slidingDrawers[0].open;
     if(activate&&action==='lower-bedside-drawer')slidingDrawers[1].open=!slidingDrawers[1].open;
     if(activate&&action==='desk-drawer')slidingDrawers[2].open=!slidingDrawers[2].open;
-    if(activate&&/^record-\d+$/.test(action))setRecordPreview(Number(action.slice(7)),event);
+    if(activate&&/^record-\d+$/.test(action)){
+      const index=Number(action.slice(7));
+      setRecordPreview(index,event);
+      playRecord(index);
+    }
     if(activate&&action==='record-player')toggleRecord();
   }
   ['pointerup','pointercancel','lostpointercapture'].forEach(type=>host.addEventListener(type,endDrag));
@@ -744,7 +758,7 @@ try {
     [-3.36,-2.78,.35+bedLengthAdd,2.55+bedLengthAdd], // bookshelf against the left wall at the foot of the bed
     [-.14,2.64,-2.28,-1.08], // desk
     [.64,1.6,-1.08,.05], // chair
-    [2.18,3.08,.77,2.29], // record cabinet
+    [2.49,3.37,.77,2.29], // record cabinet against the right wall
     [-1.36,-.72,-2.84,-2.2], // bedside table
     [2.67,3.13,-1.33,-.87] // plant
   ];
