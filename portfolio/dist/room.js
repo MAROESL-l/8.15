@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.min.js';
+import { createPortalDoor } from './portal-door.js';
 
 const host = document.querySelector('#room-canvas');
 const loading = document.querySelector('#room-loading');
@@ -136,19 +137,11 @@ try {
   box(7,.12,.06,0,.13,2.82,'#c9ceb9');
   for(const x of [-3.4,3.4])box(.1,.13,5.8,x,3.6,0,'#eee4cf');
   for(const z of [-2.82,2.82])box(6.8,.13,.1,0,3.6,z,'#eee4cf');
-  // Closed panel door on the right wall, with frame, threshold and brass handle.
-  const door = new THREE.Group();door.position.set(3.42,0,doorZ);door.rotation.y=-Math.PI/2;scene.add(door);
-  box(1.24,2.62,.07,0,1.36,0,palette.edge,door);
-  box(1.08,2.48,.06,0,1.32,.045,'#ad8059',door);
-  for(const x of [-.61,.61])box(.09,2.69,.12,x,1.39,.06,'#dcc7a4',door);
-  box(1.31,.1,.12,0,2.72,.06,'#dcc7a4',door);
-  box(1.2,.04,.18,0,.08,.06,palette.edge,door);
-  for(const y of [.69,1.91]){
-    box(.85,1.03,.023,0,y,.083,'#99714f',door);
-    box(.74,.91,.026,0,y,.1,'#b58b62',door);
-  }
-  sphere(-.39,1.29,.15,.045,'#bca579',door,[1,1,.5]);
-  rod([-.39,1.29,.19],[-.19,1.29,.19],.024,'#bca579',door);
+  // The portal replaces the former wooden door on the right wall.
+  const portalDoor=createPortalDoor(THREE);
+  portalDoor.group.position.set(3.32,1.39,doorZ);
+  portalDoor.group.rotation.y=-Math.PI/2;
+  scene.add(portalDoor.group);
   // A warm ceiling fixture lights the enclosed interior.
   const ceilingFixture=new THREE.Group();scene.add(ceilingFixture);
   cylinder(.31,.31,.045,0,3.64,0,palette.edge,ceilingFixture);
@@ -195,6 +188,8 @@ try {
   const glass = backWall.children[backWall.children.length - 1]; glass.material.emissive.set('#d2bc93'); glass.material.emissiveIntensity = .24;
   const nightGlass=mesh(new THREE.PlaneGeometry(2.62,1.76),new THREE.MeshBasicMaterial({map:nightSky,transparent:true,opacity:0,depthWrite:false}),backWall);
   nightGlass.position.set(1.34,2.35,-2.715);nightGlass.castShadow=false;nightGlass.receiveShadow=false;
+  // Draw the transparent night view before foreground transparent objects such as the globe.
+  nightGlass.renderOrder=-1;
   for (const x of [-.04, 1.34, 2.72]) box(.065, 1.94, .12, x, 2.35, -2.68, '#eee2c9', backWall);
   for (const y of [1.4, 2.35, 3.3]) box(2.8, .065, .12, 1.34, y, -2.68, '#eee2c9', backWall);
   box(3.08, .1, .33, 1.34, 1.38, -2.65, '#dfc7a1', backWall);
@@ -382,16 +377,6 @@ try {
   const apple = new THREE.Group(); apple.position.set(0,.29,-.012); lid.add(apple);
   sphere(-.018,0,0,.034,'#55585c',apple,[.85,1,.1]);sphere(.021,0,0,.034,'#55585c',apple,[.85,1,.1]);
   const leaf=sphere(.014,.051,0,.015,'#55585c',apple,[.6,1,.12]);leaf.rotation.z=-.55;
-  // Open cup with a visible inner wall; keep the water surface below its rim.
-  const cupProfile=[
-    [0,0],[.088,0],[.105,.2],[.086,.2],[.07,.02],[0,.02]
-  ].map(([radius,height])=>new THREE.Vector2(radius,height));
-  const cup=mesh(new THREE.LatheGeometry(cupProfile,32),'#e8e0c9');
-  cup.position.set(2.27,1.42,-1.47);
-  const water=mesh(new THREE.CircleGeometry(.077,32),material('#61462f',.25));
-  water.rotation.x=-Math.PI/2;
-  water.position.set(2.27,1.585,-1.47);
-  const handle=mesh(new THREE.TorusGeometry(.073,.022,8,20),'#e8e0c9');handle.position.set(2.38,1.53,-1.47);
   const notebook=new THREE.Group();scene.add(notebook);
   box(.35,.045,.44,.26,1.46,-1.52,palette.terracotta,notebook).rotation.y=-.12;
   box(.32,.019,.41,.26,1.49,-1.52,palette.paper,notebook).rotation.y=-.12;
@@ -522,7 +507,7 @@ try {
   const displayedSleeve=picture(.47,.51,-.42,1.42,-.321,recordCoverMaps[0],recordGroup);
   plant(2.9,.09,-1.1,1.05);
   // The globe hovers slightly above the desk without a stand.
-  const globeX=2.3,globeZ=-1.99,globeRadius=.17,deskSurfaceY=1.43,globeHover=.07;
+  const globeX=2.2,globeZ=-1.47,globeRadius=.17,deskSurfaceY=1.43,globeHover=.07;
   const globe=new THREE.Group();globe.position.set(globeX,deskSurfaceY+globeRadius+globeHover,globeZ);scene.add(globe);
   // Render the earth-widget palette on the room's sphere so the globe has real depth.
   // Its bundled Miniature Earth runtime is absent, so use the existing local map as a land mask.
@@ -564,6 +549,7 @@ try {
     bulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(1.4,0,t);
     bulbMaterial.color.set('#fff1ce').lerp(darkBulb,t);
     lampLight.intensity=THREE.MathUtils.lerp(.6,1.2,t);
+    portalDoor.light.intensity=THREE.MathUtils.lerp(1.8,2.8,t);
     deskBulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(.75,1.8,t);
     nightGlass.material.opacity=t;
     renderer.toneMappingExposure=THREE.MathUtils.lerp(1.12,.95,t);
@@ -859,6 +845,7 @@ try {
     if(recordPlaying&&!reducedMotion.matches)vinyl.rotation.y-=delta*3.49;
     tonearm.rotation.y=reducedMotion.matches?(recordPlaying?-.42:0):THREE.MathUtils.damp(tonearm.rotation.y,recordPlaying?-.42:0,6,delta);
     if(animated){elapsed+=delta;globe.rotation.y=elapsed*.28;}
+    portalDoor.uniforms.uTime.value=elapsed;
     renderer.render(scene,camera);frame=requestAnimationFrame(render);
   }
   document.addEventListener('visibilitychange',()=>{if(document.hidden){recordAudio.pause();cancelAnimationFrame(frame);frame=null;}else if(frame===null){lastTime=0;frame=requestAnimationFrame(render);}});
