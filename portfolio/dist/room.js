@@ -208,7 +208,7 @@ try {
   picture(.77, 1.02, -2.2, 2.91, -2.756, art, backWall);
 
   // Landscape photograph beside the bed.
-  const sideArt = new THREE.Group(); sideArt.position.set(-3.42,2.45,.35); sideArt.rotation.y=Math.PI/2;leftWall.add(sideArt);
+  const sideArt = new THREE.Group(); sideArt.position.set(-3.42,2.45,-1.3); sideArt.rotation.y=Math.PI/2;leftWall.add(sideArt);
   const sideMap=new THREE.TextureLoader().load('images/bedside-photo.jpg?v=2');
   sideMap.colorSpace=THREE.SRGBColorSpace;
   sideMap.anisotropy=renderer.capabilities.getMaxAnisotropy();
@@ -216,7 +216,7 @@ try {
   picture(1.56,1.17,0,0,.04,sideMap,sideArt);
 
   // Low bookshelf: open cubbies, varied books, a ceramic vase and a plant.
-  const shelf = new THREE.Group(); shelf.position.set(-2.06, 0, -2.47); scene.add(shelf);
+  const shelf = new THREE.Group(); shelf.position.set(-2.3, 0, .7); scene.add(shelf);
   box(2.08, 1.64, .065, 0, .92, -.25, '#805e41', shelf);
   for (const x of [-1.04, 0, 1.04]) box(.08, 1.66, .53, x, .92, 0, palette.wood, shelf);
   for (const y of [.12, .89, 1.76]) box(2.2, .1, .58, 0, y, 0, palette.lightWood, shelf);
@@ -271,12 +271,12 @@ try {
     }
     return group;
   }
-  plant(-2.75, 1.82, -2.4, .7);
-  cylinder(.1,.14,.32,-1.38,1.98,-2.43,'#e8d2ae');
-  cylinder(.065,.09,.12,-1.38,2.19,-2.43,'#e8d2ae');
+  plant(-.69, 1.82, .07, .7, shelf);
+  cylinder(.1,.14,.32,.68,1.98,.04,'#e8d2ae',shelf);
+  cylinder(.065,.09,.12,.68,2.19,.04,'#e8d2ae',shelf);
 
   // Bed, turned-down sage duvet, pillows and timber headboard.
-  const bed = new THREE.Group(); bed.position.set(-2.22,0,.3); scene.add(bed);
+  const bed = new THREE.Group(); bed.position.set(-2.44,0,-1.3); scene.add(bed);
   for(const x of [-.76,.76])for(const z of [-1.25,1.25]) cylinder(.065,.055,.3,x,.22,z,palette.edge,bed);
   rounded(1.96,.2,3.08,.04,0,.4,0,palette.wood,bed);
   rounded(1.92,.94,.13,.035,0,.84,-1.43,palette.lightWood,bed);
@@ -291,7 +291,7 @@ try {
   for(let i=0;i<5;i++)box(.009,.004,1.6,.29+i*.095,.885,.47,'#e0b68c',bed);
   // Drawer boxes slide out of hollow cabinets, rather than through solid blocks.
   const slidingDrawers=[];
-  const bedsideCabinet=new THREE.Group();bedsideCabinet.position.set(-.82,0,-.92);scene.add(bedsideCabinet);
+  const bedsideCabinet=new THREE.Group();bedsideCabinet.position.set(-1.04,0,-2.52);scene.add(bedsideCabinet);
   box(.58,.055,.57,0,.115,0,palette.wood,bedsideCabinet);
   for(const x of [-.27,.27])box(.04,.52,.57,x,.375,0,palette.wood,bedsideCabinet);
   box(.5,.52,.035,0,.375,-.267,palette.edge,bedsideCabinet);
@@ -312,7 +312,7 @@ try {
   sphere(0,.245,.32,.027,palette.edge,lowerBedsideDrawer);
   slidingDrawers.push({group:lowerBedsideDrawer,travel:.34,open:false});
   // Little reading lamp on the bedside cabinet.
-  const bedsideLamp=new THREE.Group();scene.add(bedsideLamp);
+  const bedsideLamp=new THREE.Group();bedsideLamp.position.set(-.22,0,-1.6);scene.add(bedsideLamp);
   cylinder(.12,.13,.04,-.82,.745,-.92,palette.metal,bedsideLamp);
   cylinder(.02,.02,.33,-.82,.91,-.92,palette.metal,bedsideLamp);
   cylinder(.14,.24,.24,-.82,1.13,-.92,'#efe0b8',bedsideLamp);
@@ -739,19 +739,19 @@ try {
   host.addEventListener('pointerleave',event=>{if(!drag)host.style.cursor='grab';setHomePreview(false);setRetirementPreview(false);setRecordPreview(-1,event);});
   // Floor-plan collision volumes for furniture.
   const obstacles = [
-    [-3.24,-1.2,-1.3,1.85], // bed
-    [-3.16,-.95,-2.78,-2.17], // bookshelf
+    [-3.42,-1.46,-2.84,.24], // bed
+    [-3.4,-1.2,.4,1.0], // bookshelf at the foot of the bed
     [-.14,2.64,-2.28,-1.08], // desk
     [.64,1.6,-1.08,.05], // chair
     [2.18,3.08,.77,2.29], // record cabinet
-    [-1.15,-.49,-1.25,-.6], // bedside table
+    [-1.36,-.72,-2.84,-2.2], // bedside table
     [2.67,3.13,-1.33,-.87] // plant
   ];
   const bodyRadius=.16;
   function walkable(x,z){
     if(x < -3.42+bodyRadius || x > 3.42-bodyRadius || z < -2.83+bodyRadius || z > 2.83-bodyRadius)return false;
     const drawerObstacles=[];
-    if(Math.max(bedsideDrawer.position.z,lowerBedsideDrawer.position.z)>.02)drawerObstacles.push([-1.12,-.52,-.6,-.62+Math.max(bedsideDrawer.position.z,lowerBedsideDrawer.position.z)]);
+    if(Math.max(bedsideDrawer.position.z,lowerBedsideDrawer.position.z)>.02)drawerObstacles.push([-1.34,-.74,-2.21,-2.23+Math.max(bedsideDrawer.position.z,lowerBedsideDrawer.position.z)]);
     if(deskDrawer.position.z>.13)drawerObstacles.push([1.72,2.4,-1.08,-1.21+deskDrawer.position.z]);
     return ![...obstacles,...drawerObstacles].some(([left,right,back,front])=>{
       const dx=x-THREE.MathUtils.clamp(x,left,right),dz=z-THREE.MathUtils.clamp(z,back,front);
