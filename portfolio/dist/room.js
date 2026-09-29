@@ -216,7 +216,8 @@ try {
   picture(1.56,1.17,0,0,.04,sideMap,sideArt);
 
   // Low bookshelf: open cubbies, varied books, a ceramic vase and a plant.
-  const shelf = new THREE.Group(); shelf.position.set(-3.07, 0, 1.45); shelf.rotation.y=Math.PI/2; scene.add(shelf);
+  const bedLengthAdd=.18;
+  const shelf = new THREE.Group(); shelf.position.set(-3.07, 0, 1.45+bedLengthAdd); shelf.rotation.y=Math.PI/2; scene.add(shelf);
   box(2.08, 1.64, .065, 0, .92, -.25, '#805e41', shelf);
   for (const x of [-1.04, 0, 1.04]) box(.08, 1.66, .53, x, .92, 0, palette.wood, shelf);
   for (const y of [.12, .89, 1.76]) box(2.2, .1, .58, 0, y, 0, palette.lightWood, shelf);
@@ -277,18 +278,18 @@ try {
 
   // Bed, turned-down sage duvet, pillows and timber headboard.
   const bed = new THREE.Group(); bed.position.set(-2.44,0,-1.3); scene.add(bed);
-  for(const x of [-.76,.76])for(const z of [-1.25,1.25]) cylinder(.065,.055,.3,x,.22,z,palette.edge,bed);
-  rounded(1.96,.2,3.08,.04,0,.4,0,palette.wood,bed);
+  for(const x of [-.76,.76])for(const z of [-1.25,1.25+bedLengthAdd]) cylinder(.065,.055,.3,x,.22,z,palette.edge,bed);
+  rounded(1.96,.2,3.08+bedLengthAdd,.04,0,.4,bedLengthAdd/2,palette.wood,bed);
   rounded(1.92,.94,.13,.035,0,.84,-1.43,palette.lightWood,bed);
   for(let i=0;i<8;i++)box(.028,.73,.025,-.78+i*.223,.88,-1.345,'#ba9264',bed);
-  rounded(1.85,.26,2.9,.09,0,.6,0,palette.cream,bed);
-  rounded(1.68,.12,1.76,.055,0,.79,.43,palette.sage,bed);
+  rounded(1.85,.26,2.9+bedLengthAdd,.09,0,.6,bedLengthAdd/2,palette.cream,bed);
+  rounded(1.68,.12,1.76+bedLengthAdd,.055,0,.79,.43+bedLengthAdd/2,palette.sage,bed);
   rounded(1.7,.07,.34,.025,0,.865,-.37,'#a5b298',bed);
   rounded(.76,.17,.49,.07,-.46,.84,-.93,'#f7ead3',bed).rotation.y = -.055;
   rounded(.76,.17,.49,.07,.42,.84,-.93,'#eee0c9',bed).rotation.y = .04;
-  for(let i=0;i<7;i++)box(.018,.007,1.61,-.69+i*.23,.855,.47,'#90a184',bed);
-  rounded(.53,.025,1.64,.012,.49,.87,.47,'#c28e66',bed);
-  for(let i=0;i<5;i++)box(.009,.004,1.6,.29+i*.095,.885,.47,'#e0b68c',bed);
+  for(let i=0;i<7;i++)box(.018,.007,1.61+bedLengthAdd,-.69+i*.23,.855,.47+bedLengthAdd/2,'#90a184',bed);
+  rounded(.53,.025,1.64+bedLengthAdd,.012,.49,.87,.47+bedLengthAdd/2,'#c28e66',bed);
+  for(let i=0;i<5;i++)box(.009,.004,1.6+bedLengthAdd,.29+i*.095,.885,.47+bedLengthAdd/2,'#e0b68c',bed);
   // Drawer boxes slide out of hollow cabinets, rather than through solid blocks.
   const slidingDrawers=[];
   const bedsideCabinet=new THREE.Group();bedsideCabinet.position.set(-1.04,0,-2.52);scene.add(bedsideCabinet);
@@ -739,8 +740,8 @@ try {
   host.addEventListener('pointerleave',event=>{if(!drag)host.style.cursor='grab';setHomePreview(false);setRetirementPreview(false);setRecordPreview(-1,event);});
   // Floor-plan collision volumes for furniture.
   const obstacles = [
-    [-3.42,-1.46,-2.84,.24], // bed
-    [-3.36,-2.78,.35,2.55], // bookshelf against the left wall at the foot of the bed
+    [-3.42,-1.46,-2.84,.24+bedLengthAdd], // bed
+    [-3.36,-2.78,.35+bedLengthAdd,2.55+bedLengthAdd], // bookshelf against the left wall at the foot of the bed
     [-.14,2.64,-2.28,-1.08], // desk
     [.64,1.6,-1.08,.05], // chair
     [2.18,3.08,.77,2.29], // record cabinet
