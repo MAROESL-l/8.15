@@ -536,9 +536,9 @@ try {
       const red=pixels.data[i],green=pixels.data[i+1],blue=pixels.data[i+2];
       const ocean=Math.min(1,Math.max(0,(blue-Math.max(red,green)-2)/6));
       const land=56;
-      pixels.data[i]=land+(112-land)*ocean;
-      pixels.data[i+1]=land+(164-land)*ocean;
-      pixels.data[i+2]=land+(184-land)*ocean;
+      pixels.data[i]=land+(255-land)*ocean;
+      pixels.data[i+1]=land+(255-land)*ocean;
+      pixels.data[i+2]=land+(255-land)*ocean;
       pixels.data[i+3]=255-155*ocean;
     }
     context.putImageData(pixels,0,0);
