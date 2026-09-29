@@ -535,17 +535,17 @@ try {
     for(let i=0;i<pixels.data.length;i+=4){
       const red=pixels.data[i],green=pixels.data[i+1],blue=pixels.data[i+2];
       const ocean=Math.min(1,Math.max(0,(blue-Math.max(red,green)-2)/6));
-      const land=56,oceanColor=255;
-      pixels.data[i]=land+(oceanColor-land)*ocean;
-      pixels.data[i+1]=land+(oceanColor-land)*ocean;
-      pixels.data[i+2]=land+(oceanColor-land)*ocean;
-      pixels.data[i+3]=255;
+      const land=56;
+      pixels.data[i]=land+(112-land)*ocean;
+      pixels.data[i+1]=land+(164-land)*ocean;
+      pixels.data[i+2]=land+(184-land)*ocean;
+      pixels.data[i+3]=255-155*ocean;
     }
     context.putImageData(pixels,0,0);
     loaded.image=canvas;loaded.needsUpdate=true;
   });
   globeMap.colorSpace=THREE.SRGBColorSpace;
-  mesh(new THREE.SphereGeometry(globeRadius,64,48),new THREE.MeshBasicMaterial({map:globeMap,toneMapped:false}),globe);
+  mesh(new THREE.SphereGeometry(globeRadius,64,48),new THREE.MeshBasicMaterial({map:globeMap,transparent:true,depthWrite:false,toneMapped:false}),globe);
 
   let themeBlend=window.roomTheme.value==='dark'?1:0;
   let themeTarget=themeBlend;
