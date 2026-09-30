@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.min.js';
-import { createPortalDoor } from './portal-door.js';
+import { createPortalDoor } from './portal-door.js?v=4';
 
 const host = document.querySelector('#room-canvas');
 const loading = document.querySelector('#room-loading');
@@ -19,7 +19,7 @@ try {
   const camera = new THREE.PerspectiveCamera(88, 1, .05, 80);
   // Walk freely inside the room while keeping an upright eye level.
   const eye = new THREE.Vector3(.2, 1.95, 2.35);
-  let yaw = -.045, pitch = -.14, targetYaw = yaw, targetPitch = pitch;
+  let yaw = 1.25, pitch = -.14, targetYaw = yaw, targetPitch = pitch;
   const controls = {
     update() {
       const easing = reducedMotion.matches ? 1 : .09;
@@ -128,12 +128,8 @@ try {
   box(.15,3.65,5.96,3.52,1.85,0,palette.wall);
   box(7.12,3.65,.15,0,1.85,2.94,palette.wallSide);
   box(7.2,.16,6.04,0,3.76,0,'#e8dfcb');
-  // Stop the right-wall baseboard at the door casing instead of running through its bottom.
-  const doorZ=-.15,doorTrimHalfWidth=.655,baseboardEnd=2.95;
-  const baseboardLeftEnd=doorZ-doorTrimHalfWidth-.015;
-  const baseboardRightStart=doorZ+doorTrimHalfWidth+.015;
-  box(.06,.12,baseboardLeftEnd+baseboardEnd,3.4,.13,(baseboardLeftEnd-baseboardEnd)/2,'#e0d3b7');
-  box(.06,.12,baseboardEnd-baseboardRightStart,3.4,.13,(baseboardRightStart+baseboardEnd)/2,'#e0d3b7');
+  const doorZ=-.15;
+  box(.06,.12,5.9,3.4,.13,0,'#e0d3b7');
   box(7,.12,.06,0,.13,2.82,'#c9ceb9');
   for(const x of [-3.4,3.4])box(.1,.13,5.8,x,3.6,0,'#eee4cf');
   for(const z of [-2.82,2.82])box(6.8,.13,.1,0,3.6,z,'#eee4cf');
@@ -141,7 +137,9 @@ try {
   const portalDoor=createPortalDoor(THREE);
   portalDoor.group.position.set(3.32,1.39,doorZ);
   portalDoor.group.rotation.y=-Math.PI/2;
+  portalDoor.group.scale.setScalar(0);
   scene.add(portalDoor.group);
+  let portalOpenTarget=0;
   // A warm ceiling fixture lights the enclosed interior.
   const ceilingFixture=new THREE.Group();scene.add(ceilingFixture);
   cylinder(.31,.31,.045,0,3.64,0,palette.edge,ceilingFixture);
@@ -407,7 +405,7 @@ try {
   rod([-.29,.69,.23],[-.29,1.21,.36],.025,palette.metal,chair);rod([.29,.69,.23],[.29,1.21,.36],.025,palette.metal,chair);
   rounded(.79,.56,.14,.06,0,1.11,.34,'#b97051',chair).rotation.x=-.1;
   // Record cabinet with vertically stored sleeves and a working turntable.
-  const recordGroup=new THREE.Group();recordGroup.position.set(2.93,0,1.53);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
+  const recordGroup=new THREE.Group();recordGroup.position.set(2.93,0,1.78);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
   for(const x of [-.59,.59])for(const z of [-.3,.3])cylinder(.035,.025,.22,x,.18,z,palette.edge,recordGroup);
   box(1.42,.07,.8,0,.33,0,palette.wood,recordGroup);
   box(1.32,.055,.74,0,.4,0,palette.lightWood,recordGroup);
@@ -475,7 +473,8 @@ try {
     recordCoverMaps.push(cover);
     recordCovers.push(record.cover||cover.image.toDataURL('image/png'));
   });
-  const recordPlayer=new THREE.Group();recordGroup.add(recordPlayer);
+  // Keep the turntable base entirely inside the 1.5-wide cabinet top.
+  const recordPlayer=new THREE.Group();recordPlayer.position.x=.34;recordPlayer.scale.set(.82,1,.9);recordGroup.add(recordPlayer);
   rounded(.97,.09,.66,.025,-.12,1.15,0,palette.dark,recordPlayer);
   cylinder(.265,.265,.024,-.22,1.214,0,'#1b2424',recordPlayer,64);
   const vinyl=new THREE.Group();vinyl.position.set(-.22,1.232,0);recordPlayer.add(vinyl);
@@ -503,8 +502,48 @@ try {
   }
   picture(.31,.077,.14,1.149,.337,titleTexture,recordPlayer);
   showRecordTitle(0);
-  box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
-  const displayedSleeve=picture(.47,.51,-.42,1.42,-.321,recordCoverMaps[0],recordGroup);
+  // Portal gun floats over the free end of the record cabinet, beside the turntable.
+  const portalGun=new THREE.Group();
+  const gunHoverBaseY=1.49;
+  let gunHoverTime=0;
+  portalGun.position.set(2.85,gunHoverBaseY,recordGroup.position.z-.52);
+  portalGun.rotation.y=Math.PI+.35;
+  portalGun.rotation.z=-.1;
+  portalGun.scale.setScalar(.9);
+  portalGun.userData.isPortalGun=true;
+  scene.add(portalGun);
+  // Pale shell, dark hanging handle and the bright upright canister from the reference.
+  const gunShell=new THREE.MeshStandardMaterial({color:'#dce0dc',roughness:.43,metalness:.18,emissive:'#aeb5ae',emissiveIntensity:.5});
+  const gunTop=new THREE.MeshStandardMaterial({color:'#f4f4ec',roughness:.46,emissive:'#b9beb8',emissiveIntensity:.35});
+  const gunDark=material('#24282a',.76,.08);
+  rounded(.205,.036,.30,.012,0,-.044,0,gunDark,portalGun); // lower seam
+  rounded(.22,.095,.33,.024,0,.015,0,gunShell,portalGun);
+  rounded(.18,.025,.29,.011,0,.067,0,gunTop,portalGun); // top face
+  const gunGrip=rounded(.074,.235,.073,.028,0,-.153,-.112,gunDark,portalGun);
+  gunGrip.rotation.x=.45;
+  sphere(0,-.11,0,.035,gunDark,gunGrip,[1,.65,1]);
+  const canisterBase=material('#95a99b',.35,.32);
+  cylinder(.067,.07,.022,0,.092,.084,canisterBase,portalGun,24);
+  const canisterGlass=new THREE.MeshBasicMaterial({color:'#10c82d',transparent:true,opacity:.86,depthWrite:false,toneMapped:false});
+  cylinder(.047,.052,.145,0,.174,.084,canisterGlass,portalGun,28);
+  sphere(0,.247,.084,.048,canisterGlass,portalGun,[1,.55,1]);
+  cylinder(.025,.03,.105,0,.178,.084,new THREE.MeshBasicMaterial({color:'#48ff4c',transparent:true,opacity:.72,depthWrite:false,toneMapped:false}),portalGun,20);
+  // Small red readout on top and a round dark trigger button on the visible side.
+  const gunReadoutRed=new THREE.MeshBasicMaterial({color:'#f44838',toneMapped:false});
+  const gunReadoutDim=new THREE.MeshBasicMaterial({color:'#9f2625',toneMapped:false});
+  box(.115,.006,.046,0,.083,-.062,'#202523',portalGun);
+  for(let i=0;i<4;i++)box(.012,.006,.026,-.041+i*.026,.088,-.062,i===2?gunReadoutRed:gunReadoutDim,portalGun);
+  box(.008,.035,.10,.129,.039,.014,'#202523',portalGun);
+  for(let i=0;i<3;i++)box(.007,.013,.018,.135,.043,-.018+i*.028,i===1?gunReadoutRed:gunReadoutDim,portalGun);
+  sphere(.138,.014,-.112,.038,gunDark,portalGun,[.55,1,1]);
+  // Invisible hit box for raycasting
+  const gunHitBox=mesh(new THREE.BoxGeometry(.23,.56,.34),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),portalGun);
+  gunHitBox.position.set(0,0,0);gunHitBox.castShadow=false;gunHitBox.receiveShadow=false;
+  // Bright green glow so it's easy to spot from across the room
+  const gunPointLight=new THREE.PointLight('#43ff58',.65,.9,2);
+  portalGun.add(gunPointLight);gunPointLight.position.set(0,.21,.084);
+  box(.49,.53,.03,.42,1.42,-.34,palette.paper,recordGroup);
+  const displayedSleeve=picture(.47,.51,.42,1.42,-.321,recordCoverMaps[0],recordGroup);
   plant(2.9,.09,-1.1,1.05);
   // The globe hovers slightly above the desk without a stand.
   const globeX=2.2,globeZ=-1.47,globeRadius=.17,deskSurfaceY=1.43,globeHover=.07;
@@ -549,7 +588,6 @@ try {
     bulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(1.4,0,t);
     bulbMaterial.color.set('#fff1ce').lerp(darkBulb,t);
     lampLight.intensity=THREE.MathUtils.lerp(.6,1.2,t);
-    portalDoor.light.intensity=THREE.MathUtils.lerp(1.8,2.8,t);
     deskBulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(.75,1.8,t);
     nightGlass.material.opacity=t;
     renderer.toneMappingExposure=THREE.MathUtils.lerp(1.12,.95,t);
@@ -608,7 +646,7 @@ try {
   recordAudio.addEventListener('error',()=>updateRecordState('音频加载失败'));
   let elapsed = 0, lastTime = 0, frame = null;
   reducedMotion.addEventListener('change',()=>{animated=!reducedMotion.matches;});
-  function resetView(){eye.set(.2,1.95,2.35);yaw=targetYaw=-.045;pitch=targetPitch=-.14;controls.update();}
+  function resetView(){eye.set(.2,1.95,2.35);yaw=targetYaw=1.25;pitch=targetPitch=-.14;controls.update();}
   const raycaster=new THREE.Raycaster();
   raycaster.params.Line.threshold=.01;
   const pointer=new THREE.Vector2();
@@ -694,6 +732,7 @@ try {
     raycaster.setFromCamera(pointer,camera);
     const spineHit=raycaster.intersectObjects(recordHitTargets,false)[0];
     if(spineHit)return `record-${spineHit.object.userData.recordIndex}`;
+    if(raycaster.intersectObject(gunHitBox,false).length)return 'portal-gun';
     // The nearest visible surface must belong to the laptop.
     let object=raycaster.intersectObjects(scene.children,true)[0]?.object;
     while(object){
@@ -705,6 +744,7 @@ try {
       if(object===bedsideDrawer)return 'bedside-drawer';
       if(object===lowerBedsideDrawer)return 'lower-bedside-drawer';
       if(object===deskDrawer)return 'desk-drawer';
+      if(object.userData.isPortalGun||object.parent?.userData.isPortalGun)return 'portal-gun';
       object=object.parent;
     }
     return null;
@@ -758,6 +798,7 @@ try {
       playRecord(index);
     }
     if(activate&&action==='record-player')toggleRecord();
+    if(activate&&action==='portal-gun'){portalOpenTarget=portalOpenTarget>0.5?0:1;}
   }
   ['pointerup','pointercancel','lostpointercapture'].forEach(type=>host.addEventListener(type,endDrag));
   host.addEventListener('pointerleave',event=>{if(!drag)host.style.cursor='grab';setHomePreview(false);setRetirementPreview(false);setRecordPreview(-1,event);});
@@ -767,7 +808,7 @@ try {
     [-3.36,-2.78,.35+bedLengthAdd,2.55+bedLengthAdd], // bookshelf against the left wall at the foot of the bed
     [-.14,2.64,-2.28,-1.08], // desk
     [.64,1.6,-1.08,.05], // chair
-    [2.49,3.37,.77,2.29], // record cabinet against the right wall
+    [2.49,3.37,1.02,2.54], // record cabinet against the right wall
     [-1.36,-.72,-2.84,-2.2], // bedside table
     [2.67,3.13,-1.33,-.87] // plant
   ];
@@ -845,7 +886,17 @@ try {
     if(recordPlaying&&!reducedMotion.matches)vinyl.rotation.y-=delta*3.49;
     tonearm.rotation.y=reducedMotion.matches?(recordPlaying?-.42:0):THREE.MathUtils.damp(tonearm.rotation.y,recordPlaying?-.42:0,6,delta);
     if(animated){elapsed+=delta;globe.rotation.y=elapsed*.28;}
+    if(animated&&!reducedMotion.matches)gunHoverTime+=delta;
+    portalGun.position.y=gunHoverBaseY+(reducedMotion.matches?0:Math.sin(gunHoverTime*2.1)*.035);
     portalDoor.uniforms.uTime.value=elapsed;
+    // Fade the portal light with its opening so a closed portal cannot tint the wall.
+    const portalScaleCurrent=portalDoor.group.scale.x;
+    const portalScaleTarget=portalOpenTarget;
+    const portalScale=reducedMotion.matches||Math.abs(portalScaleCurrent-portalScaleTarget)<.001
+      ?portalScaleTarget:THREE.MathUtils.damp(portalScaleCurrent,portalScaleTarget,8,delta);
+    portalDoor.group.scale.setScalar(portalScale);
+    portalDoor.light.intensity=THREE.MathUtils.lerp(1.8,2.8,themeBlend)*portalScale;
+    gunPointLight.intensity=.65*portalScale;
     renderer.render(scene,camera);frame=requestAnimationFrame(render);
   }
   document.addEventListener('visibilitychange',()=>{if(document.hidden){recordAudio.pause();cancelAnimationFrame(frame);frame=null;}else if(frame===null){lastTime=0;frame=requestAnimationFrame(render);}});

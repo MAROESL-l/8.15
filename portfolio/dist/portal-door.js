@@ -7,39 +7,10 @@ export function createPortalDoor(THREE) {
 
   const halfWidth = .59;
   const halfHeight = 1.22;
-  const edge = angle => 1 + .045 * Math.sin(5 * angle + .4)
-    + .027 * Math.sin(9 * angle - 1.1)
-    + .02 * Math.sin(17 * angle + .8);
-  const ringColors = ['#122922', '#1d5c35', '#3ed44c', '#92ff50', '#c9ff75', '#47f9b1'];
-  for (let layer = 0; layer < ringColors.length; layer++) {
-    const points = [];
-    for (let step = 0; step < 160; step++) {
-      const angle = step / 160 * Math.PI * 2;
-      const radius = edge(angle) * (1.09 - layer * .024);
-      points.push(new THREE.Vector3(
-        halfWidth * Math.cos(angle) * radius,
-        halfHeight * Math.sin(angle) * radius,
-        .07 + layer * .035 + .04 * Math.sin(7 * angle + layer * .8)
-          + .021 * Math.sin(13 * angle - layer * .8)
-      ));
-    }
-    const curve = new THREE.CatmullRomCurve3(points, true, 'centripetal');
-    const ring = new THREE.Mesh(
-      new THREE.TubeGeometry(curve, 240, .039 - layer * .004, 9, true),
-      new THREE.MeshStandardMaterial({
-        color: ringColors[layer],
-        emissive: ringColors[layer],
-        emissiveIntensity: layer < 2 ? .24 : .85,
-        roughness: .34,
-        metalness: .14
-      })
-    );
-    portal.add(ring);
-  }
-
   const uniforms = { uTime: { value: 0 } };
   const surface = new THREE.Mesh(
-    new THREE.PlaneGeometry(halfWidth * 2.17, halfHeight * 2.17),
+    // Leave enough geometry outside the irregular edge to avoid a straight clipped side.
+    new THREE.PlaneGeometry(halfWidth * 2.4, halfHeight * 2.4),
     new THREE.ShaderMaterial({
       uniforms,
       side: THREE.DoubleSide,
@@ -67,11 +38,12 @@ export function createPortalDoor(THREE) {
           return v;
         }
         void main(){
-          vec2 p=(vUv-.5)*2.0;
+          vec2 p=(vUv-.5)*2.4;
           float r=length(p);
           float a=atan(p.y,p.x);
-          float edge=1.0+.025*sin(a*5.0+.4)+.018*sin(a*9.0-1.1)+.012*sin(a*17.0+.8);
-          if(r>edge) discard;
+          float edge=1.0+.045*sin(a*5.0+.4)+.027*sin(a*9.0-1.1)+.02*sin(a*17.0+.8);
+          float alpha=1.0-smoothstep(edge*.84,edge*.98,r);
+          if(alpha<=.001) discard;
           float t=uTime*.42;
           float spiral=a*2.8-r*13.8-t*2.0;
           vec2 flow=vec2(cos(a+t*.18),sin(a+t*.18));
@@ -91,13 +63,12 @@ export function createPortalDoor(THREE) {
           float cracks=smoothstep(.76,.91,veins)*smoothstep(.36,.66,n);
           col*=1.0-cracks*.47;
           col+=vec3(.18,.45,.07)*pow(max(0.0,1.0-r),4.0);
-          col+=vec3(.32,.78,.18)*pow(smoothstep(.72,1.,r),3.0)*.55;
-          gl_FragColor=vec4(col,1.0);
+          gl_FragColor=vec4(col,alpha);
         }
       `
     })
   );
-  surface.position.z = .14;
+  surface.position.z = 0;
   portal.add(surface);
 
   const light = new THREE.PointLight('#75ff80', 2.4, 2.8, 2);
