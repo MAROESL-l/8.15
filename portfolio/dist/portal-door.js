@@ -45,12 +45,13 @@ export function createPortalDoor(THREE) {
           float alpha=1.0-smoothstep(edge*.84,edge*.98,r);
           if(alpha<=.001) discard;
           float t=uTime*.42;
-          float spiral=a*2.8-r*13.8-t*2.0;
+          // Integer angular turns keep both sides of atan's -PI/PI seam identical.
+          float spiral=a*3.0-r*13.8-t*2.0;
           vec2 flow=vec2(cos(a+t*.18),sin(a+t*.18));
           float n=fbm(p*4.3+flow*(1.2+t*.45)+vec2(sin(spiral),cos(spiral))*.19);
           float n2=fbm(p*8.5-flow*t*.35+vec2(3.2,-1.3));
           float streak=sin(spiral+n*7.0)*.5+.5;
-          float veins=sin(spiral*2.3+n2*10.0)*.5+.5;
+          float veins=sin(spiral*2.0+n2*10.0)*.5+.5;
           float whirl=sin(a*6.0-r*19.0-t*2.4+n*4.0)*.5+.5;
           float value=clamp(.12+.55*n+.35*streak+.19*whirl-.14*veins,0.,1.);
           vec3 deep=vec3(.007,.11,.075);

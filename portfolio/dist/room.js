@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.min.js';
-import { createPortalDoor } from './portal-door.js?v=4';
+import { createPortalDoor } from './portal-door.js?v=5';
 
 const host = document.querySelector('#room-canvas');
 const loading = document.querySelector('#room-loading');
@@ -128,15 +128,14 @@ try {
   box(.15,3.65,5.96,3.52,1.85,0,palette.wall);
   box(7.12,3.65,.15,0,1.85,2.94,palette.wallSide);
   box(7.2,.16,6.04,0,3.76,0,'#e8dfcb');
-  const doorZ=-.15;
   box(.06,.12,5.9,3.4,.13,0,'#e0d3b7');
   box(7,.12,.06,0,.13,2.82,'#c9ceb9');
   for(const x of [-3.4,3.4])box(.1,.13,5.8,x,3.6,0,'#eee4cf');
   for(const z of [-2.82,2.82])box(6.8,.13,.1,0,3.6,z,'#eee4cf');
-  // The portal replaces the former wooden door on the right wall.
+  // Place the portal on the clear front wall beside the record cabinet.
   const portalDoor=createPortalDoor(THREE);
-  portalDoor.group.position.set(3.32,1.39,doorZ);
-  portalDoor.group.rotation.y=-Math.PI/2;
+  portalDoor.group.position.set(1.55,1.39,2.74);
+  portalDoor.group.rotation.y=Math.PI;
   portalDoor.group.scale.setScalar(0);
   scene.add(portalDoor.group);
   let portalOpenTarget=0;
@@ -402,8 +401,8 @@ try {
   cylinder(.045,.065,.51,0,.38,0,palette.metal,chair);
   for(let i=0;i<5;i++){const a=i*Math.PI*2/5;rod([0,.15,0],[Math.cos(a)*.37,.11,Math.sin(a)*.37],.028,palette.metal,chair);sphere(Math.cos(a)*.37,.09,Math.sin(a)*.37,.065,palette.metal,chair,[1,.85,1]);}
   rounded(.77,.15,.68,.06,0,.7,0,palette.terracotta,chair);
-  rod([-.29,.69,.23],[-.29,1.21,.36],.025,palette.metal,chair);rod([.29,.69,.23],[.29,1.21,.36],.025,palette.metal,chair);
-  rounded(.79,.56,.14,.06,0,1.11,.34,'#b97051',chair).rotation.x=-.1;
+  rod([-.29,.69,.23],[-.29,.82,.35],.025,palette.metal,chair);rod([.29,.69,.23],[.29,.82,.35],.025,palette.metal,chair);
+  rounded(.79,.56,.14,.06,0,1.11,.43,'#b97051',chair).rotation.x=-.32;
   // Record cabinet with vertically stored sleeves and a working turntable.
   const recordGroup=new THREE.Group();recordGroup.position.set(2.93,0,1.78);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
   for(const x of [-.59,.59])for(const z of [-.3,.3])cylinder(.035,.025,.22,x,.18,z,palette.edge,recordGroup);
@@ -473,21 +472,25 @@ try {
     recordCoverMaps.push(cover);
     recordCovers.push(record.cover||cover.image.toDataURL('image/png'));
   });
-  // Keep the turntable base entirely inside the 1.5-wide cabinet top.
-  const recordPlayer=new THREE.Group();recordPlayer.position.x=.34;recordPlayer.scale.set(.82,1,.9);recordGroup.add(recordPlayer);
-  rounded(.97,.09,.66,.025,-.12,1.15,0,palette.dark,recordPlayer);
-  cylinder(.265,.265,.024,-.22,1.214,0,'#1b2424',recordPlayer,64);
-  const vinyl=new THREE.Group();vinyl.position.set(-.22,1.232,0);recordPlayer.add(vinyl);
+  // Leave a visible margin around the turntable on the 1.5 by .87 cabinet top.
+  const recordPlayer=new THREE.Group();recordPlayer.position.x=-.18;recordPlayer.scale.set(.76,1,.82);recordGroup.add(recordPlayer);
+  rounded(.97,.09,.66,.018,-.12,1.15,0,'#293f38',recordPlayer);
+  box(.88,.008,.006,-.12,1.185,.352,'#a9b8ad',recordPlayer);
+  cylinder(.265,.265,.02,-.22,1.204,0,'#1b2424',recordPlayer,64);
+  const platterRim=mesh(new THREE.TorusGeometry(.263,.005,8,64),'#a7b4ab',recordPlayer);
+  platterRim.rotation.x=Math.PI/2;platterRim.position.set(-.22,1.215,0);
+  const vinyl=new THREE.Group();vinyl.position.set(-.22,1.216,0);recordPlayer.add(vinyl);
   cylinder(.253,.253,.008,0,0,0,material('#252b2b',.28,.15),vinyl,64);
-  for(const r of [.12,.15,.18,.21,.24]){const groove=mesh(new THREE.TorusGeometry(r,.002,4,64),'#424847',vinyl);groove.rotation.x=Math.PI/2;}
+  for(const r of [.12,.15,.18,.21,.24]){const groove=mesh(new THREE.TorusGeometry(r,.002,4,64),'#424847',vinyl);groove.rotation.x=Math.PI/2;groove.position.y=.006;}
   cylinder(.083,.083,.009,0,.007,0,palette.terracotta,vinyl);
   box(.009,.005,.09,.025,.014,0,palette.cream,vinyl);
   cylinder(.014,.014,.03,0,.023,0,'#a8b0aa',vinyl);
-  const tonearm=new THREE.Group();tonearm.position.set(.23,1.25,-.21);recordPlayer.add(tonearm);
+  cylinder(.049,.049,.024,.23,1.224,-.21,'#8d9f95',recordPlayer);
+  const tonearm=new THREE.Group();tonearm.position.set(.23,1.252,-.21);recordPlayer.add(tonearm);
   cylinder(.045,.045,.028,0,-.03,0,'#aab2ab',tonearm);
-  rod([0,0,0],[-.06,0,.36],.013,'#c5c8ba',tonearm);
-  rod([-.06,0,.36],[-.16,0,.4],.013,'#c5c8ba',tonearm);
-  box(.053,.032,.084,-.175,-.01,.39,palette.cream,tonearm);
+  rod([0,0,0],[-.04,0,.25],.013,'#c5c8ba',tonearm);
+  rod([-.04,0,.25],[-.14,0,.31],.013,'#c5c8ba',tonearm);
+  box(.053,.032,.07,-.16,-.01,.31,palette.cream,tonearm);
   cylinder(.019,.019,.012,-.52,1.211,.24,'#d3bc84',recordPlayer);
   const powerLight=material('#544c3b',.45);
   cylinder(.019,.019,.012,.26,1.211,.24,powerLight,recordPlayer);
@@ -500,50 +503,64 @@ try {
     ctx.fillText(records[index].title,256,65,470);
     titleTexture.needsUpdate=true;
   }
-  picture(.31,.077,.14,1.149,.337,titleTexture,recordPlayer);
+  picture(.31,.077,.14,1.149,.355,titleTexture,recordPlayer);
   showRecordTitle(0);
   // Portal gun floats over the free end of the record cabinet, beside the turntable.
   const portalGun=new THREE.Group();
   const gunHoverBaseY=1.49;
   let gunHoverTime=0;
-  portalGun.position.set(2.85,gunHoverBaseY,recordGroup.position.z-.52);
-  portalGun.rotation.y=Math.PI+.35;
+  portalGun.position.set(2.85,gunHoverBaseY,recordGroup.position.z+.34);
+  // The barrel points along local +Z; aim it at the portal on the front wall.
+  portalGun.rotation.y=Math.atan2(portalDoor.group.position.x-portalGun.position.x,portalDoor.group.position.z-portalGun.position.z);
   portalGun.rotation.z=-.1;
   portalGun.scale.setScalar(.9);
   portalGun.userData.isPortalGun=true;
   scene.add(portalGun);
-  // Pale shell, dark hanging handle and the bright upright canister from the reference.
+  // Pale shell, rear grip, upright energy cell and three-lens muzzle.
   const gunShell=new THREE.MeshStandardMaterial({color:'#dce0dc',roughness:.43,metalness:.18,emissive:'#aeb5ae',emissiveIntensity:.5});
-  const gunTop=new THREE.MeshStandardMaterial({color:'#f4f4ec',roughness:.46,emissive:'#b9beb8',emissiveIntensity:.35});
   const gunDark=material('#24282a',.76,.08);
-  rounded(.205,.036,.30,.012,0,-.044,0,gunDark,portalGun); // lower seam
-  rounded(.22,.095,.33,.024,0,.015,0,gunShell,portalGun);
-  rounded(.18,.025,.29,.011,0,.067,0,gunTop,portalGun); // top face
-  const gunGrip=rounded(.074,.235,.073,.028,0,-.153,-.112,gunDark,portalGun);
+  rounded(.18,.026,.42,.009,0,-.037,.06,gunDark,portalGun); // lower seam
+  rounded(.19,.075,.45,.018,0,.015,.06,gunShell,portalGun);
+  const gunGrip=rounded(.065,.225,.062,.025,0,-.145,-.112,gunShell,portalGun);
   gunGrip.rotation.x=.45;
-  sphere(0,-.11,0,.035,gunDark,gunGrip,[1,.65,1]);
+  sphere(0,-.09,-.106,.02,gunDark,portalGun,[1,.8,1]);
   const canisterBase=material('#95a99b',.35,.32);
-  cylinder(.067,.07,.022,0,.092,.084,canisterBase,portalGun,24);
+  const canisterZ=.15;
+  cylinder(.052,.055,.018,0,.075,canisterZ,canisterBase,portalGun,24);
   const canisterGlass=new THREE.MeshBasicMaterial({color:'#10c82d',transparent:true,opacity:.86,depthWrite:false,toneMapped:false});
-  cylinder(.047,.052,.145,0,.174,.084,canisterGlass,portalGun,28);
-  sphere(0,.247,.084,.048,canisterGlass,portalGun,[1,.55,1]);
-  cylinder(.025,.03,.105,0,.178,.084,new THREE.MeshBasicMaterial({color:'#48ff4c',transparent:true,opacity:.72,depthWrite:false,toneMapped:false}),portalGun,20);
-  // Small red readout on top and a round dark trigger button on the visible side.
-  const gunReadoutRed=new THREE.MeshBasicMaterial({color:'#f44838',toneMapped:false});
-  const gunReadoutDim=new THREE.MeshBasicMaterial({color:'#9f2625',toneMapped:false});
-  box(.115,.006,.046,0,.083,-.062,'#202523',portalGun);
-  for(let i=0;i<4;i++)box(.012,.006,.026,-.041+i*.026,.088,-.062,i===2?gunReadoutRed:gunReadoutDim,portalGun);
-  box(.008,.035,.10,.129,.039,.014,'#202523',portalGun);
-  for(let i=0;i<3;i++)box(.007,.013,.018,.135,.043,-.018+i*.028,i===1?gunReadoutRed:gunReadoutDim,portalGun);
-  sphere(.138,.014,-.112,.038,gunDark,portalGun,[.55,1,1]);
+  cylinder(.034,.038,.10,0,.131,canisterZ,canisterGlass,portalGun,28);
+  sphere(0,.186,canisterZ,.034,canisterGlass,portalGun,[1,.55,1]);
+  cylinder(.018,.022,.072,0,.131,canisterZ,new THREE.MeshBasicMaterial({color:'#48ff4c',transparent:true,opacity:.72,depthWrite:false,toneMapped:false}),portalGun,20);
+  // Recessed red readout and the small button behind it.
+  const gunReadout=texture((ctx,w,h)=>{
+    ctx.fillStyle='#151b1b';ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#697171';ctx.lineWidth=18;ctx.strokeRect(12,12,w-24,h-24);
+    ctx.fillStyle='#4a1516';ctx.fillRect(35,35,w-70,h-70);
+    ctx.font='bold 86px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='#ef4038';ctx.fillText('Maroesl',w/2,h/2+10,w-90);
+  },512,256);
+  const readout=mesh(new THREE.PlaneGeometry(.10,.055),new THREE.MeshBasicMaterial({map:gunReadout,side:THREE.DoubleSide}),portalGun);
+  readout.rotation.x=-Math.PI/2;readout.position.set(0,.076,-.025);
+  cylinder(.026,.026,.012,0,.076,-.105,'#343a3a',portalGun,24);
+  cylinder(.008,.008,.003,0,.084,-.105,'#222626',portalGun,16);
+  // Dark front plate with three green emitter lenses.
+  rounded(.18,.065,.012,.005,0,.014,.288,gunDark,portalGun);
+  const lensRim=new THREE.MeshBasicMaterial({color:'#111819'});
+  const lensGlow=new THREE.MeshBasicMaterial({color:'#25e939',toneMapped:false});
+  for(const x of [-.055,0,.055]){
+    const rim=mesh(new THREE.CircleGeometry(.019,24),lensRim,portalGun);
+    rim.position.set(x,.014,.296);
+    const lens=mesh(new THREE.CircleGeometry(.012,24),lensGlow,portalGun);
+    lens.position.set(x,.014,.297);
+  }
   // Invisible hit box for raycasting
-  const gunHitBox=mesh(new THREE.BoxGeometry(.23,.56,.34),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),portalGun);
-  gunHitBox.position.set(0,0,0);gunHitBox.castShadow=false;gunHitBox.receiveShadow=false;
+  const gunHitBox=mesh(new THREE.BoxGeometry(.24,.51,.49),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}),portalGun);
+  gunHitBox.position.set(0,-.035,.065);gunHitBox.castShadow=false;gunHitBox.receiveShadow=false;
   // Bright green glow so it's easy to spot from across the room
   const gunPointLight=new THREE.PointLight('#43ff58',.65,.9,2);
-  portalGun.add(gunPointLight);gunPointLight.position.set(0,.21,.084);
-  box(.49,.53,.03,.42,1.42,-.34,palette.paper,recordGroup);
-  const displayedSleeve=picture(.47,.51,.42,1.42,-.321,recordCoverMaps[0],recordGroup);
+  portalGun.add(gunPointLight);gunPointLight.position.set(0,.16,canisterZ);
+  box(.49,.53,.03,-.42,1.42,-.34,palette.paper,recordGroup);
+  const displayedSleeve=picture(.47,.51,-.42,1.42,-.321,recordCoverMaps[0],recordGroup);
   plant(2.9,.09,-1.1,1.05);
   // The globe hovers slightly above the desk without a stand.
   const globeX=2.2,globeZ=-1.47,globeRadius=.17,deskSurfaceY=1.43,globeHover=.07;
@@ -807,7 +824,7 @@ try {
     [-3.42,-1.46,-2.84,.24+bedLengthAdd], // bed
     [-3.36,-2.78,.35+bedLengthAdd,2.55+bedLengthAdd], // bookshelf against the left wall at the foot of the bed
     [-.14,2.64,-2.28,-1.08], // desk
-    [.64,1.6,-1.08,.05], // chair
+    [.64,1.6,-1.08,.2], // chair, including its reclined back
     [2.49,3.37,1.02,2.54], // record cabinet against the right wall
     [-1.36,-.72,-2.84,-2.2], // bedside table
     [2.67,3.13,-1.33,-.87] // plant
@@ -884,7 +901,8 @@ try {
       jacket.rotation.y=reducedMotion.matches?angle:THREE.MathUtils.damp(jacket.rotation.y,angle,13,delta);
     });
     if(recordPlaying&&!reducedMotion.matches)vinyl.rotation.y-=delta*3.49;
-    tonearm.rotation.y=reducedMotion.matches?(recordPlaying?-.42:0):THREE.MathUtils.damp(tonearm.rotation.y,recordPlaying?-.42:0,6,delta);
+    const armTarget=recordPlaying?-.42:0;
+    tonearm.rotation.y=reducedMotion.matches?armTarget:THREE.MathUtils.damp(tonearm.rotation.y,armTarget,6,delta);
     if(animated){elapsed+=delta;globe.rotation.y=elapsed*.28;}
     if(animated&&!reducedMotion.matches)gunHoverTime+=delta;
     portalGun.position.y=gunHoverBaseY+(reducedMotion.matches?0:Math.sin(gunHoverTime*2.1)*.035);
