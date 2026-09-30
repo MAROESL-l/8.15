@@ -396,13 +396,30 @@ try {
   sphere(0,-.115,0,.06,deskBulbMaterial,deskShade,[.82,1,.82]);
   const lampLight=new THREE.PointLight('#ffe0a1',.6,3);lampLight.position.set(lampX+.395,2.1,lampZ+.11);scene.add(lampLight);
 
-  // Desk chair.
+  // Open-frame molded chair: splayed legs, triangular side supports and a curved back.
   const chair = new THREE.Group(); chair.position.set(1.12,0,-.46);scene.add(chair);
-  cylinder(.045,.065,.51,0,.38,0,palette.metal,chair);
-  for(let i=0;i<5;i++){const a=i*Math.PI*2/5;rod([0,.15,0],[Math.cos(a)*.37,.11,Math.sin(a)*.37],.028,palette.metal,chair);sphere(Math.cos(a)*.37,.09,Math.sin(a)*.37,.065,palette.metal,chair,[1,.85,1]);}
-  rounded(.77,.15,.68,.06,0,.7,0,palette.terracotta,chair);
-  rod([-.29,.69,.23],[-.29,.82,.35],.025,palette.metal,chair);rod([.29,.69,.23],[.29,.82,.35],.025,palette.metal,chair);
-  rounded(.79,.56,.14,.06,0,1.11,.43,'#b97051',chair).rotation.x=-.32;
+  const chairGreen=new THREE.MeshStandardMaterial({color:'#a2d51d',roughness:.52,metalness:0});
+  function chairBeam(start,end,fromRadius,toRadius){
+    const a=new THREE.Vector3(...start),b=new THREE.Vector3(...end);
+    const beam=mesh(new THREE.CylinderGeometry(toRadius,fromRadius,a.distanceTo(b),12),chairGreen,chair);
+    beam.position.copy(a).add(b).multiplyScalar(.5);
+    beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),b.sub(a).normalize());
+  }
+  rounded(.68,.06,.60,.02,0,.73,-.01,chairGreen,chair);
+  for(const side of [-1,1]){
+    chairBeam([side*.37,.055,.46],[side*.33,.76,.28],.022,.046); // rear leg
+    chairBeam([side*.33,.76,.28],[side*.32,1.34,.40],.046,.052); // back upright
+    chairBeam([side*.37,.055,-.43],[side*.33,.76,-.28],.022,.043); // front leg
+    chairBeam([side*.33,.76,-.28],[side*.33,1.16,-.33],.043,.049); // front arm support
+    chairBeam([side*.33,.77,.24],[side*.33,1.14,-.31],.034,.04); // open triangular brace
+    const armCurve=new THREE.CatmullRomCurve3([
+      new THREE.Vector3(side*.32,1.34,.40),
+      new THREE.Vector3(side*.33,1.34,.13),
+      new THREE.Vector3(side*.33,1.16,-.33)
+    ]);
+    mesh(new THREE.TubeGeometry(armCurve,24,.047,10,false),chairGreen,chair);
+  }
+  rounded(.73,.145,.08,.035,0,1.35,.42,chairGreen,chair).rotation.x=-.08;
   // Record cabinet with vertically stored sleeves and a working turntable.
   const recordGroup=new THREE.Group();recordGroup.position.set(2.93,0,1.78);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
   for(const x of [-.59,.59])for(const z of [-.3,.3])cylinder(.035,.025,.22,x,.18,z,palette.edge,recordGroup);
