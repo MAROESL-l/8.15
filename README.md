@@ -1,18 +1,33 @@
 # Maroesl 的个人网站
 
+![黑桃 A 正面与 Maroesl 牌背预览](dist/images/poker-preview.svg)
 
+深色个人展示页，包含个人介绍、四张可翻转的作品卡、技能与实践经历、兴趣和邮箱联系。
 
-## 扑克牌预览
-
-![黑桃 A 正面与 Maroesl 牌背预览](portfolio/dist/images/poker-preview.svg)
-
-
-## 本地打开网站
-
-在仓库根目录运行：
+直接打开 `dist/index.html`，或在本目录执行：
 
 ```sh
-python -m http.server 4173 --bind 127.0.0.1 --directory portfolio/dist
+python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
 ```
 
-打开 [首页](http://127.0.0.1:4173/) 查看交互扑克牌，或打开 [Room](http://127.0.0.1:4173/room.html) 探索房间。网站文件位于 [`portfolio/dist/`](portfolio/dist/)，更多说明见 [`portfolio/README.md`](portfolio/README.md)。
+浏览器访问 http://127.0.0.1:4173 。无需安装依赖。
+
+- `dist/index.html`：个人内容、真实作品图片和链接。
+- `dist/styles.css`：响应式布局、扑克牌翻转与减少动态效果适配。
+- `dist/script.js`：作品简介、点击翻转、鼠标倾斜。
+
+
+精选作品：柒品家具、拼图、茄子音乐、猫眼电影。简介根据项目类型整理；经历只描述已有作品体现的开发实践，没有添加工作单位、职称或年限。
+
+项目链接位于翻牌按钮外，支持独立键盘访问。翻牌支持鼠标、触屏、Enter 与空格。
+
+## Room 三维空间
+
+访问 http://127.0.0.1:4173/room.html 查看交互房间（请通过上述本地服务打开，ES 模块不能通过双击 HTML 加载）。
+
+- `dist/room.html`、`dist/room.css`：Room 页面与响应式布局。
+- `dist/room.js`：程序化 3D 家具、可开合抽屉、唱片预览与播放交互。
+- `dist/audio/赤与青.m4a`、`dist/audio/鱼仔.m4a`：唱片机播放的音频；`mp3/` 保存原始音源。
+- `dist/vendor/`：本地 Three.js 0.169.0、OrbitControls 与 MIT 许可；运行时无需 CDN。
+
+Room 为四面墙、房门和天花板围合的完整室内空间。镜头可在房间内自由移动，WASD 或方向键行走，Shift 加速，滚轮前后移动、触控板横向滚动左右移动；拖动进行 360° 转头环视，可抬头看天花板、低头看地面，带平滑阻尼且不会穿墙；带墙壁与家具碰撞检测，停止操作或窗口失焦时停止行走。Home 复位，空格暂停或播放地球动画。点击床头柜和书桌抽屉可开合；悬浮唱片柜下层竖放的唱片可使其出列并查看封面，点击《赤与青》或《鱼仔》唱片可从头播放对应歌曲，其余唱片暂无音源。点击唱片机或按 R 可暂停、继续播放，唱针和转盘跟随播放状态，离开页面时暂停。页面遵循系统减少动态效果偏好。
