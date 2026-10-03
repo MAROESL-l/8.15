@@ -16,7 +16,8 @@ try {
   renderer.toneMappingExposure = 1.12;
   host.append(renderer.domElement);
   renderer.domElement.setAttribute('aria-hidden', 'true');
-  const camera = new THREE.PerspectiveCamera(88, 1, .05, 80);
+  // A moderate field of view keeps furniture proportions natural near the edges.
+  const camera = new THREE.PerspectiveCamera(55, 1, .05, 80);
   // Walk freely inside the room while keeping an upright eye level.
   const eye = new THREE.Vector3(.2, 1.95, 2.35);
   let yaw = 1.25, pitch = -.14, targetYaw = yaw, targetPitch = pitch;
@@ -127,7 +128,65 @@ try {
   // Complete room envelope: four solid walls and a ceiling.
   box(.15,3.65,5.96,3.52,1.85,0,palette.wall);
   box(7.12,3.65,.15,0,1.85,2.94,palette.wallSide);
-  box(7.2,.16,6.04,0,3.76,0,'#e8dfcb');
+  box(7.2,.16,6.04,0,3.76,0,'#091225');
+  // Daytime clouds tile seamlessly as they drift across the inner ceiling.
+  const dayCeilingSky=texture((ctx,w,h)=>{
+    ctx.fillStyle='#68b8ed';ctx.fillRect(0,0,w,h);
+    let seed=2047;
+    const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    for(let i=0;i<12;i++){
+      const centerX=random()*w,centerY=random()*h,size=65+random()*65;
+      for(let puff=0;puff<12;puff++){
+        const x=centerX+(random()-.5)*size*2.6,y=centerY+(random()-.5)*size*.8;
+        const radius=size*(.4+random()*.45);
+        for(const dx of [-w,0,w])for(const dy of [-h,0,h]){
+          ctx.save();ctx.translate(x+dx,y+dy);ctx.scale(1,.7);
+          const glow=ctx.createRadialGradient(0,0,0,0,0,radius);
+          glow.addColorStop(0,'#ffffffb8');glow.addColorStop(.55,'#f6fbff80');glow.addColorStop(1,'#ffffff00');
+          ctx.fillStyle=glow;ctx.fillRect(-radius,-radius,radius*2,radius*2);ctx.restore();
+        }
+      }
+    }
+  },1024,1024);
+  dayCeilingSky.wrapS=dayCeilingSky.wrapT=THREE.RepeatWrapping;
+  const dayCeiling=mesh(new THREE.PlaneGeometry(7.04,5.88),new THREE.MeshBasicMaterial({map:dayCeilingSky,toneMapped:false}));
+  dayCeiling.rotation.x=Math.PI/2;dayCeiling.position.y=3.678;
+  dayCeiling.castShadow=false;dayCeiling.receiveShadow=false;
+  // The star layer fades in with the room's night theme.
+  const ceilingSky=texture((ctx,w,h)=>{
+    const background=ctx.createLinearGradient(0,0,w,h);
+    background.addColorStop(0,'#070e20');background.addColorStop(.5,'#14233e');background.addColorStop(1,'#080e22');
+    ctx.fillStyle=background;ctx.fillRect(0,0,w,h);
+    let seed=7319;
+    const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    // Soft, overlapping clouds form a diagonal Milky Way without hard edges.
+    ctx.globalCompositeOperation='screen';
+    for(let i=0;i<32;i++){
+      const x=w*(i/31),y=h*(.76-.5*i/31)+(random()-.5)*h*.15;
+      const radius=120+random()*190;
+      const cloud=ctx.createRadialGradient(x,y,0,x,y,radius);
+      cloud.addColorStop(0,i%3===0?'#6a508b12':'#6f9cb515');cloud.addColorStop(1,'#00000000');
+      ctx.fillStyle=cloud;ctx.fillRect(x-radius,y-radius,radius*2,radius*2);
+    }
+    for(let i=0;i<1100;i++){
+      const x=random()*w,y=random()*h,bright=random();
+      const radius=bright>.985?2.2:bright>.85?1.15:.45+random()*.4;
+      ctx.globalAlpha=.3+random()*.7;
+      ctx.fillStyle=i%7===0?'#ffe7bd':'#dcecff';
+      ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
+      if(bright>.985){
+        const glow=ctx.createRadialGradient(x,y,0,x,y,13);
+        glow.addColorStop(0,'#c9e5ff80');glow.addColorStop(1,'#c9e5ff00');
+        ctx.fillStyle=glow;ctx.fillRect(x-13,y-13,26,26);
+        ctx.globalAlpha=.45;ctx.fillStyle='#e9f3ff';
+        ctx.fillRect(x-5,y-.4,10,.8);ctx.fillRect(x-.4,y-5,.8,10);
+      }
+    }
+    ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  },2048,1720);
+  const starCeiling=mesh(new THREE.PlaneGeometry(7.04,5.88),new THREE.MeshBasicMaterial({map:ceilingSky,toneMapped:false,transparent:true,depthWrite:false}));
+  starCeiling.rotation.x=Math.PI/2;starCeiling.position.y=3.676;
+  starCeiling.castShadow=false;starCeiling.receiveShadow=false;
   box(.06,.12,5.9,3.4,.13,0,'#e0d3b7');
   box(7,.12,.06,0,.13,2.82,'#c9ceb9');
   for(const x of [-3.4,3.4])box(.1,.13,5.8,x,3.6,0,'#eee4cf');
@@ -139,13 +198,6 @@ try {
   portalDoor.group.scale.setScalar(0);
   scene.add(portalDoor.group);
   let portalOpenTarget=0;
-  // A warm ceiling fixture lights the enclosed interior.
-  const ceilingFixture=new THREE.Group();scene.add(ceilingFixture);
-  cylinder(.31,.31,.045,0,3.64,0,palette.edge,ceilingFixture);
-  cylinder(.36,.28,.12,0,3.57,0,'#ede1bf',ceilingFixture);
-  const bulbMaterial=new THREE.MeshStandardMaterial({color:'#fff1ce',emissive:'#ffe3ab',emissiveIntensity:1.4});
-  cylinder(.29,.29,.013,0,3.505,0,bulbMaterial,ceilingFixture);
-  const ceilingLight=new THREE.PointLight('#ffe8c5',12,10,2);ceilingLight.position.set(0,3.35,0);scene.add(ceilingLight);
 
   // Window, sunset landscape and soft linen curtains.
   const sky = texture((ctx, w, h) => {
@@ -396,30 +448,50 @@ try {
   sphere(0,-.115,0,.06,deskBulbMaterial,deskShade,[.82,1,.82]);
   const lampLight=new THREE.PointLight('#ffe0a1',.6,3);lampLight.position.set(lampX+.395,2.1,lampZ+.11);scene.add(lampLight);
 
-  // Open-frame molded chair: splayed legs, triangular side supports and a curved back.
+  // A white levitating chair: ceramic shell, soft upholstery and an ion drive.
   const chair = new THREE.Group(); chair.position.set(1.12,0,-.46);scene.add(chair);
-  const chairGreen=new THREE.MeshStandardMaterial({color:'#a2d51d',roughness:.52,metalness:0});
-  function chairBeam(start,end,fromRadius,toRadius){
-    const a=new THREE.Vector3(...start),b=new THREE.Vector3(...end);
-    const beam=mesh(new THREE.CylinderGeometry(toRadius,fromRadius,a.distanceTo(b),12),chairGreen,chair);
-    beam.position.copy(a).add(b).multiplyScalar(.5);
-    beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),b.sub(a).normalize());
-  }
-  rounded(.68,.06,.60,.02,0,.73,-.01,chairGreen,chair);
+  const chairShell=new THREE.MeshStandardMaterial({color:'#f5f8fc',emissive:'#dce6f2',emissiveIntensity:.12,roughness:.26,metalness:.18});
+  const chairCushion=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.85});
+  const chairMetal=new THREE.MeshStandardMaterial({color:'#bccbd7',roughness:.3,metalness:.8});
+  const chairGlow=new THREE.MeshStandardMaterial({color:'#b9f4ff',emissive:'#39cfff',emissiveIntensity:2,roughness:.25});
+  rounded(.82,.15,.74,.065,0,.76,-.02,chairShell,chair);
+  rounded(.68,.075,.6,.035,0,.867,-.055,chairCushion,chair);
+  const chairBack=new THREE.Group();chairBack.position.set(0,.83,.28);chairBack.rotation.x=.12;chair.add(chairBack);
+  rounded(.78,.94,.15,.07,0,.43,.05,chairShell,chairBack);
+  rounded(.63,.61,.075,.035,0,.34,-.06,chairCushion,chairBack);
+  rounded(.44,.17,.08,.035,0,.75,-.055,chairCushion,chairBack);
+  // Recessed light strips outline the shell without overpowering its white finish.
+  for(const side of [-1,1])rounded(.014,.67,.008,.003,side*.35,.44,-.029,chairGlow,chairBack);
+  for(const side of [-1,1])rounded(.012,.54,.008,.003,side*.31,.44,.129,chairGlow,chairBack);
+  for(const y of [.2,.29,.38])rounded(.35,.018,.008,.003,0,y,.129,chairMetal,chairBack);
   for(const side of [-1,1]){
-    chairBeam([side*.37,.055,.46],[side*.33,.76,.28],.022,.046); // rear leg
-    chairBeam([side*.33,.76,.28],[side*.32,1.34,.40],.046,.052); // back upright
-    chairBeam([side*.37,.055,-.43],[side*.33,.76,-.28],.022,.043); // front leg
-    chairBeam([side*.33,.76,-.28],[side*.33,1.16,-.33],.043,.049); // front arm support
-    chairBeam([side*.33,.77,.24],[side*.33,1.14,-.31],.034,.04); // open triangular brace
     const armCurve=new THREE.CatmullRomCurve3([
-      new THREE.Vector3(side*.32,1.34,.40),
-      new THREE.Vector3(side*.33,1.34,.13),
-      new THREE.Vector3(side*.33,1.16,-.33)
+      new THREE.Vector3(side*.34,.8,.2),
+      new THREE.Vector3(side*.39,.96,.12),
+      new THREE.Vector3(side*.39,1.04,-.12),
+      new THREE.Vector3(side*.37,1.02,-.31)
     ]);
-    mesh(new THREE.TubeGeometry(armCurve,24,.047,10,false),chairGreen,chair);
+    mesh(new THREE.TubeGeometry(armCurve,24,.055,12,false),chairShell,chair);
+    rounded(.105,.035,.32,.015,side*.39,1.073,-.14,chairCushion,chair);
+    rounded(.017,.008,.15,.003,side*.39,1.095,-.19,chairGlow,chair);
   }
-  rounded(.73,.145,.08,.035,0,1.35,.42,chairGreen,chair).rotation.x=-.08;
+  cylinder(.23,.19,.10,0,.645,0,chairMetal,chair,48);
+  cylinder(.18,.22,.075,0,.56,0,chairShell,chair,48);
+  const chairDrive=new THREE.Group();chairDrive.position.y=.51;chair.add(chairDrive);
+  const driveRing=mesh(new THREE.TorusGeometry(.235,.016,12,64),chairGlow,chairDrive);driveRing.rotation.x=Math.PI/2;
+  for(let i=0;i<3;i++){
+    const arc=mesh(new THREE.TorusGeometry(.275,.012,8,32,Math.PI*.42),chairGlow,chairDrive);
+    arc.rotation.set(Math.PI/2,0,i*Math.PI*2/3);arc.position.y=-.06;
+  }
+  const hoverLight=new THREE.PointLight('#7fe0ff',.3,1.6,2);hoverLight.position.set(0,.43,0);chair.add(hoverLight);
+  // A fixed floor glow makes the open space beneath the floating seat readable.
+  const hoverPoolMap=texture((ctx,w,h)=>{
+    const glow=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);
+    glow.addColorStop(0,'#6edfff65');glow.addColorStop(.5,'#50d6ff28');glow.addColorStop(1,'#50d6ff00');
+    ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+  },128,128);
+  const hoverPool=mesh(new THREE.PlaneGeometry(.95,.95),new THREE.MeshBasicMaterial({map:hoverPoolMap,transparent:true,depthWrite:false,toneMapped:false}));
+  hoverPool.rotation.x=-Math.PI/2;hoverPool.position.set(1.12,.087,-.46);hoverPool.castShadow=false;hoverPool.receiveShadow=false;
   // Record cabinet with vertically stored sleeves and a working turntable.
   const recordGroup=new THREE.Group();recordGroup.position.set(2.93,0,1.78);recordGroup.rotation.y=-Math.PI/2;scene.add(recordGroup);
   for(const x of [-.59,.59])for(const z of [-.3,.3])cylinder(.035,.025,.22,x,.18,z,palette.edge,recordGroup);
@@ -432,8 +504,8 @@ try {
   const records=[
     {title:'赤与青',subtitle:'RED & BLUE',background:'#e3211c',accent:'#078cba',cover:'images/red-and-blue-cover.webp',audio:'audio/赤与青.m4a'},
     {title:'鱼仔',subtitle:'卢广仲 · HE-R',background:'#ece7d6',accent:'#292525',cover:'images/fish-cover.webp',audio:'audio/鱼仔.m4a'},
-    {title:'城市漫游',subtitle:'CITY WALK',background:'#936652',accent:'#f5dfb8'},
-    {title:'海岸线',subtitle:'COASTLINE',background:'#527a78',accent:'#eac985'},
+    {title:'我想念',subtitle:'汪苏泷 · 我想念',background:'#253dc2',accent:'#f2eedf',cover:'images/i-miss-you-cover.png',audio:'audio/我想念.m4a'},
+    {title:'在深秋',subtitle:'在深秋',background:'#999589',accent:'#fffef0',cover:'images/in-late-autumn-cover.png',audio:'audio/在深秋.m4a'},
     {title:'慢慢来',subtitle:'SLOW DAYS',background:'#756b89',accent:'#f3c5a5'},
     {title:'日落之后',subtitle:'AFTER SUNSET',background:'#704f4c',accent:'#f1b77c'},
     {title:'微光',subtitle:'GLIMMER',background:'#536454',accent:'#d9ddaa'},
@@ -492,7 +564,9 @@ try {
   // Leave a visible margin around the turntable on the 1.5 by .87 cabinet top.
   const recordPlayer=new THREE.Group();recordPlayer.position.x=-.18;recordPlayer.scale.set(.76,1,.82);recordGroup.add(recordPlayer);
   rounded(.97,.09,.66,.018,-.12,1.15,0,'#293f38',recordPlayer);
-  box(.88,.008,.006,-.12,1.185,.352,'#a9b8ad',recordPlayer);
+  // Seat trim and fittings against the plinth's front (z=.33) and top (y=1.195).
+  const playerFront=.33,playerTop=1.195;
+  box(.88,.008,.006,-.12,1.17,playerFront,'#a9b8ad',recordPlayer);
   cylinder(.265,.265,.02,-.22,1.204,0,'#1b2424',recordPlayer,64);
   const platterRim=mesh(new THREE.TorusGeometry(.263,.005,8,64),'#a7b4ab',recordPlayer);
   platterRim.rotation.x=Math.PI/2;platterRim.position.set(-.22,1.215,0);
@@ -502,15 +576,15 @@ try {
   cylinder(.083,.083,.009,0,.007,0,palette.terracotta,vinyl);
   box(.009,.005,.09,.025,.014,0,palette.cream,vinyl);
   cylinder(.014,.014,.03,0,.023,0,'#a8b0aa',vinyl);
-  cylinder(.049,.049,.024,.23,1.224,-.21,'#8d9f95',recordPlayer);
-  const tonearm=new THREE.Group();tonearm.position.set(.23,1.252,-.21);recordPlayer.add(tonearm);
+  cylinder(.049,.049,.024,.23,playerTop+.012,-.21,'#8d9f95',recordPlayer);
+  const tonearm=new THREE.Group();tonearm.position.set(.23,1.235,-.21);recordPlayer.add(tonearm);
   cylinder(.045,.045,.028,0,-.03,0,'#aab2ab',tonearm);
   rod([0,0,0],[-.04,0,.25],.013,'#c5c8ba',tonearm);
   rod([-.04,0,.25],[-.14,0,.31],.013,'#c5c8ba',tonearm);
   box(.053,.032,.07,-.16,-.01,.31,palette.cream,tonearm);
-  cylinder(.019,.019,.012,-.52,1.211,.24,'#d3bc84',recordPlayer);
+  cylinder(.019,.019,.012,-.52,playerTop+.006,.24,'#d3bc84',recordPlayer);
   const powerLight=material('#544c3b',.45);
-  cylinder(.019,.019,.012,.26,1.211,.24,powerLight,recordPlayer);
+  cylinder(.019,.019,.012,.26,playerTop+.006,.24,powerLight,recordPlayer);
   const titleTexture=texture(()=>{},512,128);
   function showRecordTitle(index){
     const ctx=titleTexture.image.getContext('2d');
@@ -520,7 +594,7 @@ try {
     ctx.fillText(records[index].title,256,65,470);
     titleTexture.needsUpdate=true;
   }
-  picture(.31,.077,.14,1.149,.355,titleTexture,recordPlayer);
+  picture(.31,.055,.14,1.15,playerFront+.001,titleTexture,recordPlayer);
   showRecordTitle(0);
   // Portal gun floats over the free end of the record cabinet, beside the turntable.
   const portalGun=new THREE.Group();
@@ -607,10 +681,11 @@ try {
 
   let themeBlend=window.roomTheme.value==='dark'?1:0;
   let themeTarget=themeBlend;
+  let themeFrom=themeBlend,themeTransitionStart=0;
+  const themeTransitionDuration=1200;
   const darkAmbient=new THREE.Color('#9badcd');
   const darkGround=new THREE.Color('#303c52');
   const darkFill=new THREE.Color('#829ed5');
-  const darkBulb=new THREE.Color('#687182');
   function updateRoomTheme(t){
     ambient.intensity=THREE.MathUtils.lerp(2.5,.65,t);
     ambient.color.set('#fff1d7').lerp(darkAmbient,t);
@@ -618,16 +693,21 @@ try {
     sun.intensity=THREE.MathUtils.lerp(4.2,.25,t);
     fill.intensity=THREE.MathUtils.lerp(1.4,.45,t);
     fill.color.set('#d5e7ee').lerp(darkFill,t);
-    ceilingLight.intensity=THREE.MathUtils.lerp(12,0,t);
-    bulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(1.4,0,t);
-    bulbMaterial.color.set('#fff1ce').lerp(darkBulb,t);
     lampLight.intensity=THREE.MathUtils.lerp(.6,1.2,t);
     deskBulbMaterial.emissiveIntensity=THREE.MathUtils.lerp(.75,1.8,t);
     nightGlass.material.opacity=t;
+    dayCeiling.visible=t<1;
+    starCeiling.visible=t>0;
+    starCeiling.material.opacity=t;
     renderer.toneMappingExposure=THREE.MathUtils.lerp(1.12,.95,t);
   }
   function applyRoomTheme(){
-    themeTarget=window.roomTheme.value==='dark'?1:0;
+    const nextTheme=window.roomTheme.value==='dark'?1:0;
+    if(nextTheme!==themeTarget){
+      themeFrom=themeBlend;
+      themeTarget=nextTheme;
+      themeTransitionStart=performance.now();
+    }
     screen.material.map=screenMaps[themeTarget];
     screen.material.emissiveMap=screenMaps[themeTarget];
     screen.material.needsUpdate=true;
@@ -902,8 +982,11 @@ try {
     const delta=lastTime?Math.min((time-lastTime)/1000,.05):0;lastTime=time;
     updateWalking(delta);
     controls.update();
-    if(Math.abs(themeTarget-themeBlend)>.001){
-      themeBlend+=(themeTarget-themeBlend)*(reducedMotion.matches?1:Math.min(1,delta*14));
+    if(themeBlend!==themeTarget){
+      const progress=reducedMotion.matches?1:THREE.MathUtils.clamp((time-themeTransitionStart)/themeTransitionDuration,0,1);
+      // Ease gently at both ends, and finish exactly at the target theme.
+      const eased=progress*progress*progress*(progress*(progress*6-15)+10);
+      themeBlend=progress===1?themeTarget:THREE.MathUtils.lerp(themeFrom,themeTarget,eased);
       updateRoomTheme(themeBlend);
     }
     updateHomePreview();
@@ -921,7 +1004,13 @@ try {
     const armTarget=recordPlaying?-.42:0;
     tonearm.rotation.y=reducedMotion.matches?armTarget:THREE.MathUtils.damp(tonearm.rotation.y,armTarget,6,delta);
     if(animated){elapsed+=delta;globe.rotation.y=elapsed*.28;}
+    if(animated&&!reducedMotion.matches&&dayCeiling.visible){
+      dayCeilingSky.offset.x=(dayCeilingSky.offset.x+delta*.008)%1;
+      dayCeilingSky.offset.y=(dayCeilingSky.offset.y+delta*.002)%1;
+    }
     if(animated&&!reducedMotion.matches)gunHoverTime+=delta;
+    chair.position.y=reducedMotion.matches?0:Math.sin(gunHoverTime*1.5)*.025;
+    chairDrive.rotation.y=gunHoverTime*.35;
     portalGun.position.y=gunHoverBaseY+(reducedMotion.matches?0:Math.sin(gunHoverTime*2.1)*.035);
     portalDoor.uniforms.uTime.value=elapsed;
     // Fade the portal light with its opening so a closed portal cannot tint the wall.
